@@ -1,0 +1,243 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "CourtMate Full API Collection",
+		"description": "Comprehensive collection for testing all CourtMate Microservices (B2C, B2B, AI) via Nginx Gateway.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01. Auth & Security",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if (response.data && response.data.access_token) {",
+									"    pm.environment.set(\"jwt_token\", response.data.access_token);",
+									"    console.log(\"JWT Token saved to environment variable\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@arena-q7.vn\",\n    \"password\": \"SecurePassword123!\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/auth/login" }
+					}
+				},
+				{
+					"name": "MFA Verify",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mfa_session_token\": \"mfa_sess_abc123\",\n    \"otp_code\": \"847291\",\n    \"mfa_method\": \"totp\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/auth/mfa/verify" }
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"rt_9f3c1a7e2b...\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/auth/token/refresh" }
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"rt_9f3c1a7e2b...\",\n    \"logout_all_devices\": false\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/auth/logout" }
+					}
+				}
+			]
+		},
+		{
+			"name": "02. B2C - Customer Platform",
+			"item": [
+				{
+					"name": "Search Nearby Venues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/venues/nearby?lat=10.7769&lng=106.7009&radius_km=5",
+							"query": [
+								{ "key": "lat", "value": "10.7769" },
+								{ "key": "lng", "value": "106.7009" },
+								{ "key": "radius_km", "value": "5" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Venue Slots",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/venues/{{venue_id}}/slots?date_from=2025-07-15&date_to=2025-07-20"
+						}
+					}
+				},
+				{
+					"name": "Lock Slot",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"expected_version\": 7,\n    \"lock_duration_minutes\": 8\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/slots/{{slot_id}}/lock" }
+					}
+				},
+				{
+					"name": "Checkout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"booking_items\": [\n        {\n            \"slot_id\": \"s_001\",\n            \"lock_token\": \"lk_7f3d9e2a1b\"\n        }\n    ],\n    \"payment_method\": \"momo\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/checkouts" }
+					}
+				}
+			]
+		},
+		{
+			"name": "03. Smart Admin - Operations",
+			"item": [
+				{
+					"name": "View Calendar Grid",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/venues/{{venue_id}/calendar?date=2025-07-15"
+						}
+					}
+				},
+				{
+					"name": "Update Slot (Reschedule/Cancel)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"expected_version\": 12,\n    \"action\": \"reschedule\",\n    \"new_slot_id\": \"s_010\",\n    \"reason\": \"Khách yêu cầu\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/admin/slots/{{slot_id}}" }
+					}
+				}
+			]
+		},
+		{
+			"name": "04. Admin - Venue & Court Management",
+			"item": [
+				{
+					"name": "Create Venue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sân Pickleball Quận 7 Arena\",\n    \"address\": \"123 Nguyễn Thị Thập, Quận 7\",\n    \"lat\": 10.7301,\n    \"lng\": 106.7218\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/admin/venues" }
+					}
+				}
+			]
+		},
+		{
+			"name": "05. Admin - Slot Management",
+			"item": [
+				{
+					"name": "Bulk Generate Slots",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"date_from\": \"2025-08-01\",\n    \"date_to\": \"2025-08-31\",\n    \"time_slots\": [\n        { \"start\": \"08:00\", \"end\": \"09:00\" }\n    ],\n    \"apply_to_days\": [\"monday\"],\n    \"base_price\": 120000\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/admin/courts/{{court_id}}/slots/bulk-generate" }
+					}
+				}
+			]
+		},
+		{
+			"name": "06. AI - Dynamic Pricing",
+			"item": [
+				{
+					"name": "Calculate Dynamic Prices (Internal)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-Internal-Service-Key", "value": "secret-key", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"venue_id\": \"v_9f2a1b3c\",\n    \"date\": \"2025-07-15\",\n    \"slot_ids\": [\"s_001\", \"s_002\"]\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/internal/pricing/calculate" }
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost", "type": "string" },
+		{ "key": "jwt_token", "value": "", "type": "string" },
+		{ "key": "venue_id", "value": "10000000-0000-0000-0000-000000000001", "type": "string" },
+		{ "key": "court_id", "value": "20000000-0000-0000-0000-000000000001", "type": "string" },
+		{ "key": "slot_id", "value": "s_001", "type": "string" }
+	]
+}
