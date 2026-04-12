@@ -13,17 +13,17 @@ Hình dưới đây mô tả tổng quan kiến trúc hạ tầng hệ thống C
 
 Hình \ref{fig:simplified_arch} minh họa kiến trúc hạ tầng tổng thể của hệ thống CourtMate. Hệ thống được tổ chức thành các lớp (Layers) tách biệt nhằm đảm bảo tính linh hoạt và dễ quản lý:
 
-\begin{description}
-    \item[Lớp biên (Edge Layer):] Sử dụng \textbf{Nginx} đóng vai trò là API Gateway và Reverse Proxy. Đây là điểm tiếp nhận duy nhất cho toàn bộ lưu lượng từ client, hỗ trợ điều phối các yêu cầu (Routing) dựa trên đường dẫn URL.
-    \item[Lớp ứng dụng (Application Layer):] Các dịch vụ được phân tách theo domain nghiệp vụ:
+\begin{enumerate}
+    \item \textbf{Lớp biên (Edge Layer):} Sử dụng \textbf{Nginx} đóng vai trò là API Gateway và Reverse Proxy. Đây là điểm tiếp nhận duy nhất cho toàn bộ lưu lượng từ client, hỗ trợ điều phối các yêu cầu (Routing) dựa trên đường dẫn URL.
+    \item \textbf{Lớp ứng dụng (Application Layer):} Các dịch vụ được phân tách theo domain nghiệp vụ:
     \begin{itemize}
         \item \textit{B2C Service:} Xử lý luồng đặt sân và trải nghiệm người dùng.
         \item \textit{B2B Service:} Quản trị vận hành cho các đối tác chủ sân.
         \item \textit{AI Pricing Engine:} Tính toán định giá động bằng các thuật toán thông minh.
     \end{itemize}
-    \item[Lớp dữ liệu (Data Layer):] Áp dụng mẫu thiết kế \textbf{Shared Database Pattern} với PostgreSQL. Cách tiếp cận này giúp tối ưu hóa chi phí và đơn giản hóa việc đối soát dữ liệu giữa các dịch vụ.
-    \item[Lớp hạ tầng (Infrastructure Layer):] Triển khai theo chiến lược \textbf{Multi-Cloud}. Các cụm tính toán đặt tại Cloud nội địa để giảm độ trễ (Latency), trong khi dữ liệu được lưu trữ tại Cloud quốc tế để tận dụng tính ổn định cao.
-\end{description}
+    \item \textbf{Lớp dữ liệu (Data Layer):} Áp dụng mẫu thiết kế \textbf{Shared Database Pattern} với PostgreSQL. Cách tiếp cận này giúp tối ưu hóa chi phí và đơn giản hóa việc đối soát dữ liệu giữa các dịch vụ.
+    \item \textbf{Lớp hạ tầng (Infrastructure Layer):} Triển khai theo chiến lược \textbf{Multi-Cloud}. Các cụm tính toán đặt tại Cloud nội địa để giảm độ trễ (Latency), trong khi dữ liệu được lưu trữ tại Cloud quốc tế để tận dụng tính ổn định cao.
+\end{enumerate}
 
 Kiến trúc này được lựa chọn nhằm ưu tiên tính khả thi, chi phí thấp và khả năng mở rộng tuyến tính cho giai đoạn MVP của hệ thống.
 
