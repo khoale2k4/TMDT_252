@@ -1,13 +1,72 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  
+}
+
+model Venue {
+  id              String   @id @default(uuid())
+  name            String
+  address         String
+  lat             Float
+  lng             Float
+  sport_types     String[]
+  amenities       String[]
+  min_price       Int
+  max_price       Int
+  rating_avg      Float    @default(0)
+  total_reviews   Int      @default(0)
+  cover_image_url String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  // THÊM DÒNG NÀY ĐỂ LIÊN KẾT:
+  courts          Court[] 
+}
+
+// THÊM BẢNG COURT
+model Court {
+  id         String   @id @default(uuid())
+  venue_id   String
+  name       String
+  sport_type String
+  slots      Slot[]
+
+  venue      Venue    @relation(fields: [venue_id], references: [id], onDelete: Cascade)
+}
+
+// THÊM BẢNG SLOT
+model Slot {
+  id         String   @id @default(uuid())
+  court_id   String
+  date       String   // Lưu kiểu "YYYY-MM-DD" cho dễ query
+  start_time String   // VD: "08:00"
+  end_time   String   // VD: "09:00"
+  status     String   // "available", "booked", "locked"
+  price      Int
+  version    Int      @default(1)
+
+  locked_by    String?   // ID của user đang giữ slot
+  locked_until DateTime? // Thời gian hết hạn khóa
+
+  lock_token   String?   // Dùng để đối chiếu lúc checkout
+  booking_id   String?
+
+  court      Court    @relation(fields: [court_id], references: [id], onDelete: Cascade)
+  booking      Booking?  @relation(fields: [booking_id], references: [id])
+}
+
+
+model Booking {
+  id             String   @id @default(uuid())
+  user_id        String
+  status         String   // "pending_payment", "paid", "cancelled"
+  payment_method String
+  total_amount   Int
+  created_at     DateTime @default(now())
+
+  slots          Slot[]
 }
