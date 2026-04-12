@@ -1,25 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 
-export class AppError extends Error {
-  statusCode: number;
-
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
-
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
+  console.error('[Error Handler]:', err);
 
-  console.error(`[Error] ${statusCode} - ${message}`);
-
+  const statusCode = err.status || 500;
+  
   res.status(statusCode).json({
     error: {
-      message,
-      status: statusCode,
-    },
+      code: err.code || "INTERNAL_SERVER_ERROR",
+      message: err.message || "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.",
+      details: err.details || {}
+    }
   });
 };

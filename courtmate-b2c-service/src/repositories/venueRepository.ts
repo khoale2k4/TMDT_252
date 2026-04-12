@@ -1,25 +1,66 @@
-// This repository would normally use Prisma, but for now it returns mock data as requested.
 import prisma from '../config/prisma';
 
-export const getNearbyVenues = async (lat: number, lng: number, radiusKm: number) => {
-  return [
-    {
-      venue_id: 'v_9f2a1b3c',
-      name: 'Sân Pickleball Quận 7 Arena (Mock)',
-      address: '123 Nguyễn Thị Thập, Quận 7, TP.HCM',
-      distance_km: 1.24,
-      sport_types: ['pickleball', 'badminton'],
-      price_range: { min: 80000, max: 180000 },
-      rating: { average: 4.7, total_reviews: 128 },
-    },
-    {
-      venue_id: 'v_2e1f4d9a',
-      name: 'Phú Thọ Stadium (Mock)',
-      address: '219 Lý Thường Kiệt, Quận 11, TP.HCM',
-      distance_km: 3.5,
-      sport_types: ['badminton'],
-      price_range: { min: 60000, max: 120000 },
-      rating: { average: 4.5, total_reviews: 512 },
-    },
-  ];
+export interface NearbyVenueParams {
+  lat: number;
+  lng: number;
+  radiusKm: number;
+  sportTypes?: string[];
+  sortBy?: string;
+  limit: number;
+  offset: number;
+}
+
+export const findNearbyVenues = async (params: NearbyVenueParams) => {
+  const { lat, lng, radiusKm, sportTypes, sortBy, limit, offset } = params;
+
+  // Công thức Haversine tính khoảng cách (km)
+  const distanceCalc = `
+    (6371 * acos(
+      cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng})) + 
+      sin(radians(${lat})) * sin(radians(lat))
+    ))
+  `;
+
+  // Xây dựng điều kiện lọc động
+  let whereClause = `WHERE ${distanceCalc} <= ${radiusKm}`;
+  
+  if (sportTypes && sportTypes.length > 0) {
+    const formattedTypes = sportTypes.map(t => `'${t}'`).join(',');
+    whereClause += ` AND sport_types && ARRAY[${formattedTypes}]::text[]`;
+  }
+
+  // Xây dựng điều kiện sắp xếp
+  let orderByClause = `ORDER BY distance_km ASC`; // Mặc định sort_by = distance
+  if (sortBy === 'price_asc') orderByClause = `ORDER BY min_price ASC`;
+  if (sortBy === 'rating') orderByClause = `ORDER BY rating_avg DESC`;
+
+  // Query Data
+  const query = `
+    SELECT 
+      id as venue_id, name, address, lat, lng,
+      sport_types, amenities, cover_image_url,
+      min_price, max_price, rating_avg, total_reviews,
+      ${distanceCalc} AS distance_km
+    FROM "Venue"
+    ${whereClause}
+    ${orderByClause}
+    LIMIT ${limit} OFFSET ${offset}
+  `;
+
+  // Query Count để làm phân trang
+  const countQuery = `
+    SELECT COUNT(*)::int as total
+    FROM "Venue"
+    ${whereClause}
+  `;
+
+  const [venues, countResult] = await Promise.all([
+    prisma.$queryRawUnsafe<any[]>(query),
+    prisma.$queryRawUnsafe<any[]>(countQuery)
+  ]);
+
+  return {
+    venues,
+    total: countResult[0]?.total || 0
+  };
 };
