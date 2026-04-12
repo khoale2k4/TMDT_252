@@ -1,0 +1,36 @@
+\section{Chiến lược bán hàng và Cạnh tranh}
+
+\subsection{Chiến lược định giá và Tối ưu doanh thu (Pricing \& Monetization Strategy)}
+Hệ thống CourtMate áp dụng mô hình doanh thu phức hợp (Hybrid Monetization) nhằm tối ưu hóa dòng tiền từ cả hai phía cung và cầu, đồng thời tạo ra rào cản gia nhập thị trường đối với các đối thủ cạnh tranh. Chiến lược này được phân rã thành ba luồng giá trị cốt lõi:
+
+\begin{enumerate}
+    \item \textit{Phân khúc B2B (Chủ sân):} Hệ thống triển khai mô hình SaaS (Software-as-a-Service) dựa trên các gói thuê bao linh hoạt (Tier-based Pricing). Điểm khác biệt lớn nhất là cam kết Zero-Commission (0\% phí hoa hồng trên mỗi giao dịch). Thay vì trích phần trăm doanh thu như các nền tảng trung gian, CourtMate thu phí duy trì hệ thống cố định, giúp chủ sân tối ưu hóa lợi nhuận biên và khuyến khích họ đưa toàn bộ quỹ sân lên hệ thống trực tuyến.
+    \item \textit{Phân khúc B2C (Người chơi):} Cung cấp gói Hội viên Premium để tạo doanh thu ổn định (Recurring Revenue). Người dùng Premium hưởng các đặc quyền như đặt lịch không cần cọc (Hold-without-deposit), ưu tiên ghép trận và các voucher từ đối tác thương mại.
+    \item \textit{AI Dynamic Pricing:} Thuật toán AI hoạt động như một công cụ Yield Management tự động. Hệ thống sẽ điều chỉnh giá thuê sân theo thời gian thực dựa trên thời tiết và mật độ occupancy — tăng giá vào giờ cao điểm và giảm giá sâu vào giờ thấp điểm để giảm thiểu chi phí cơ hội.
+\end{enumerate}
+
+\subsection{Lợi thế cạnh tranh độc quyền (Unique Selling Propositions - USP)}
+CourtMate định vị mình là giải pháp dẫn đầu thị trường nhờ vào các lợi thế cạnh tranh mang tính bản địa hóa và công nghệ vượt trội:
+\begin{itemize}
+    \item \textit{Localized Integration:} Tích hợp sâu với các cổng thanh toán MoMo, ZaloPay và đặc biệt là hệ thống hóa đơn điện tử MISA. Đây là rào cản kỹ thuật mà các ứng dụng quốc tế khó vượt qua tại thị trường Việt Nam.
+    \item \textit{Data-Driven Insights:} Cung cấp cho chủ sân các công cụ phân tích dữ liệu trực quan như Bản đồ nhiệt (Heatmap) về tỷ lệ lấp đầy và báo cáo tài chính thời gian thực.
+    \item \textit{Hybrid Sports Support:} Hỗ trợ cấu hình lưới lịch linh hoạt cho các môn thể thao lai như Pickleball, cho phép chia nhỏ hoặc gộp sân một cách nhanh chóng.
+\end{itemize}
+
+\subsection{Phân tích đối thủ cạnh tranh (Competitor Analysis Matrix)}
+Dưới đây là bảng so sánh CourtMate với các nhóm đối thủ chính dựa trên các tiêu chí vận hành thực tế:
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{2.5cm}|c|X|X|X|}
+    \hline
+    \textbf{Tiêu chí} & \textbf{CourtMate} & \textbf{Nền tảng Quốc tế \cite{ref:playtomic, ref:courtreserve}} & \textbf{Giải pháp Nội địa \cite{ref:alobo}} & \textbf{Quản lý truyền thống} \\ \hline
+    Chi phí sử dụng & Phí SaaS thấp & Phí SaaS cao (199\$-549\$/th) \cite{ref:playtomic, ref:courtreserve} & Phí SaaS trung bình (220k-299k) \cite{ref:alobo} & Miễn phí \\ \hline
+    Tự động hóa AI & Cao (Dynamic Pricing) & Trung bình & Không hỗ trợ định giá động & Không hỗ trợ \\ \hline
+    Bản địa hóa & Tối ưu (MISA/MoMo) & Hạn chế \cite{ref:playtomic, ref:courtreserve} & Tốt (Thanh toán VN) & Thủ công \\ \hline
+    Trải nghiệm UX & Mượt mà, đa dịch vụ & Chuyên nghiệp & Phổ thông, tập trung POS & Phụ thuộc nhân sự \\ \hline
+    \end{tabularx}
+    \caption{Ma trận so sánh năng lực cạnh tranh}
+    \label{tab:competitor_matrix}
+\end{table}

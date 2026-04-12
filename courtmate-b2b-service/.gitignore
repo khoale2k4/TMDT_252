@@ -1,0 +1,13 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+/src/main/resources/application-local.yml
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+.settings/
+.project
+.classpath
+*.iml
+*.iws
+*.ipr
+.idea/

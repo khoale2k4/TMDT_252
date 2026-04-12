@@ -1,0 +1,57 @@
+\section{Kiến trúc hệ thống và Thiết kế kỹ thuật}
+
+\subsection{Thiết kế Kiến trúc Microservices và Phân tầng}
+
+Hình dưới đây mô tả tổng quan kiến trúc hạ tầng hệ thống CourtMate:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/system_architecture.png}
+    \caption{Sơ đồ phân tầng và giao tiếp các thành phần trong hệ thống CourtMate}
+    \label{fig:simplified_arch}
+\end{figure}
+
+Hình \ref{fig:simplified_arch} minh họa kiến trúc hạ tầng tổng thể của hệ thống CourtMate. Hệ thống được tổ chức thành các lớp (Layers) tách biệt nhằm đảm bảo tính linh hoạt và dễ quản lý:
+
+\begin{description}
+    \item[Lớp biên (Edge Layer):] Sử dụng \textbf{Nginx} đóng vai trò là API Gateway và Reverse Proxy. Đây là điểm tiếp nhận duy nhất cho toàn bộ lưu lượng từ client, hỗ trợ điều phối các yêu cầu (Routing) dựa trên đường dẫn URL.
+    \item[Lớp ứng dụng (Application Layer):] Các dịch vụ được phân tách theo domain nghiệp vụ:
+    \begin{itemize}
+        \item \textit{B2C Service:} Xử lý luồng đặt sân và trải nghiệm người dùng.
+        \item \textit{B2B Service:} Quản trị vận hành cho các đối tác chủ sân.
+        \item \textit{AI Pricing Engine:} Tính toán định giá động bằng các thuật toán thông minh.
+    \end{itemize}
+    \item[Lớp dữ liệu (Data Layer):] Áp dụng mẫu thiết kế \textbf{Shared Database Pattern} với PostgreSQL. Cách tiếp cận này giúp tối ưu hóa chi phí và đơn giản hóa việc đối soát dữ liệu giữa các dịch vụ.
+    \item[Lớp hạ tầng (Infrastructure Layer):] Triển khai theo chiến lược \textbf{Multi-Cloud}. Các cụm tính toán đặt tại Cloud nội địa để giảm độ trễ (Latency), trong khi dữ liệu được lưu trữ tại Cloud quốc tế để tận dụng tính ổn định cao.
+\end{description}
+
+Kiến trúc này được lựa chọn nhằm ưu tiên tính khả thi, chi phí thấp và khả năng mở rộng tuyến tính cho giai đoạn MVP của hệ thống.
+
+\subsection{Chi tiết các thành phần và Công nghệ}
+Hệ thống CourtMate được triển khai theo kiến trúc Microservices tinh gọn, tập trung vào tính khả thi và tốc độ phát triển. Thay vì áp dụng các mô hình Enterprise phức tạp, nhóm đã lựa chọn mô hình Pragmatic Microservices nhằm tối ưu hóa tài nguyên học thuật và đáp ứng thời gian hoàn thành bài tập lớn môn học.
+
+\subsection{Cơ chế giao tiếp và Traffic Routing}
+Hệ thống sử dụng Nginx đóng vai trò là API Gateway và Reverse Proxy duy nhất tại Port 80. Nginx chịu trách nhiệm điều hướng traffic (Request Routing) đến các dịch vụ tương ứng dựa trên tiền tố URL:
+
+\begin{itemize}
+    \item \texttt{/api/v1/b2c/*}: Điều hướng đến B2C Service (Node.js).
+    \item \texttt{/api/v1/admin/*}: Điều hướng đến B2B Service (Spring Boot).
+    \item \texttt{/api/v1/internal/pricing/*}: Điều hướng đến AI Engine Service (FastAPI).
+\end{itemize}
+
+Về giao tiếp giữa các dịch vụ (Inter-service Communication), hệ thống chuyển đổi hoàn toàn sang mô hình Synchronous HTTP/RESTful API. Cách tiếp cận này giúp giảm độ phức tạp trong việc quản lý trạng thái hệ thống, đồng thời đảm bảo tính minh bạch và dễ dàng trong việc debug/kiểm thử luồng dữ liệu.
+
+\subsection{Thiết kế Dữ liệu: Shared Database Pattern}
+Nhằm tiết kiệm tài nguyên Cloud và đơn giản hóa quy trình đối soát dữ liệu, CourtMate áp dụng mẫu thiết kế Shared Database Pattern. Toàn bộ các Microservices cùng kết nối và truy xuất vào một instance PostgreSQL duy nhất. 
+\begin{itemize}
+    \item \textit{Ưu điểm:} Cắt giảm chi phí vận hành nhiều instance DB độc lập; cho phép thực hiện các phép Join dữ liệu phức tạp giữa các dịch vụ mà không cần cơ chế Distributed Join hay Messaging.
+    \item \textit{Đánh đổi:} Việc dùng chung Database yêu cầu sự phối hợp chặt chẽ về Schema giữa các nhóm phát triển B2C và B2B để tránh xung đột dữ liệu.
+\end{itemize}
+
+\subsection{Biện luận về các Đánh đổi kỹ thuật (Technical Trade-offs)}
+Trong bối cảnh bài tập lớn môn học với giới hạn về thời gian và tài nguyên máy chủ, nhóm phát triển đã chủ động chấp nhận một phần Technical Debt (Nợ kỹ thuật):
+\begin{enumerate}
+    \item \textbf{Loại bỏ Message Broker (Kafka):} Việc thay thế Event-driven bằng REST API giúp loại bỏ chi phí duy trì hạ tầng Kafka nặng nề, tập trung hoàn toàn vào việc hiện thực hóa các tính năng thương mại điện tử cốt lõi.
+    \item \textbf{Loại bỏ Caching Layer (Redis):} Nhóm đánh giá rằng tần suất truy cập của bài tập lớn chưa chạm tới giới hạn của database PostgreSQL, do đó việc loại bỏ Redis giúp đơn giản hóa kiến trúc và giảm thiểu rủi ro mất đồng bộ dữ liệu cache.
+\end{enumerate}
+Sự lựa chọn này hoàn toàn phù hợp với giai đoạn xây dựng MVP (Minimum Viable Product) của dự án.

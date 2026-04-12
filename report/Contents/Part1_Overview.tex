@@ -1,0 +1,45 @@
+\section{Phân tích bối cảnh và Khảo sát thị trường}
+
+\subsection{Phân tích thị trường}
+Thị trường thể thao vãng lai (recreational sports) tại Việt Nam đang trải qua giai đoạn tăng trưởng nóng với tỷ lệ CAGR đạt mức 15.1\% \cite{ref:statista} trong giai đoạn 2023-2025. Đặc biệt, sự bùng nổ của bộ môn Pickleball — một "hybrid sport" kết hợp giữa tennis, cầu lông và bóng bàn — đã tạo ra một làn sóng đầu tư hạ tầng quy mô chưa từng có. 
+
+Dựa trên các dữ liệu khảo sát thực tế (primary research), các cụm sân tại các thành phố lớn như TP. Hồ Chí Minh và Hà Nội thường xuyên đạt tỷ lệ lấp đầy (occupancy rate) trên 95\% \cite{ref:laodong} trong các khung giờ cao điểm (17:00 - 21:00). Tuy nhiên, một nghịch lý tồn tại là tỷ lệ này giảm sâu xuống dưới 30\% trong các khung giờ hành chính (8:00 - 16:00). 
+
+\subsection{Bài toán Chi phí cơ hội (Opportunity Cost Analysis)}
+Dưới góc nhìn kinh tế học, việc các slots sân trống trong giờ thấp điểm không đơn thuần là sự thiếu vắng người chơi, mà là một khoản Chi phí cơ hội rất lớn đối với chủ đầu tư. 
+\begin{itemize}
+    \item \textbf{Khấu hao cố định:} Các chi phí thuê mặt bằng, bảo trì mặt sân và nhân sự tại chỗ là các chi phí cố định (fixed costs) phát sinh bất kể sân có người chơi hay không.
+    \item \textbf{Thất thoát doanh thu biên:} Với mức giá thuê sân dao động từ 150.000 - 250.000 VNĐ/giờ \cite{ref:laodong}, việc trống 5-8 tiếng mỗi ngày trên quy mô cụm 10 sân sẽ gây thất thoát doanh thu tiềm năng lên tới hàng tỷ đồng mỗi năm.
+\end{itemize}
+Dự án \textbf{CourtMate} ra đời để giải quyết bài toán tối ưu hóa nguồn lực này thông qua cơ chế định giá động và kết nối cung-cầu thời gian thực.
+
+\subsection{Phân tích SWOT mở rộng}
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+    \hline
+    \textbf{Điểm mạnh (Strengths)} & 
+    \begin{itemize}[leftmargin=*, nosep]
+        \item Chiến lược "Zero-Commission" giúp thâm nhập thị trường (Market Penetration) nhanh chóng bằng cách phá vỡ rào cản chi phí trung gian.
+        \item Hệ thống lõi (Core Engine) hỗ trợ giao dịch thời gian thực với độ trễ cực thấp.
+    \end{itemize} \\ \hline
+    \textbf{Điểm yếu (Weaknesses)} & 
+    \begin{itemize}[leftmargin=*, nosep]
+        \item Phụ thuộc vào thói quen chuyển đổi số (Digital Transformation) của các chủ sân truyền thống.
+        \item Rủi ro về tính sẵn sàng của hệ thống mạng tại các khu vực ngoại thành.
+    \end{itemize} \\ \hline
+    \textbf{Cơ hội (Opportunities)} & 
+    \begin{itemize}[leftmargin=*, nosep]
+        \item Xu hướng thể thao hóa cộng đồng đang được chính phủ và các doanh nghiệp lớn thúc đẩy.
+        \item Khả năng mở rộng quy mô (Scalability) sang các môn thể thao khác như bóng đá Futsal hoặc Golf 3D.
+    \end{itemize} \\ \hline
+    \textbf{Thách thức (Threats)} & 
+    \begin{itemize}[leftmargin=*, nosep]
+        \item Sự cạnh tranh từ các nền tảng cũ (legacy systems) có tệp khách hàng trung thành lớn.
+        \item Biến động chi phí vận hành hạ tầng Cloud và API phí bản đồ.
+    \end{itemize} \\ \hline
+    \end{tabularx}
+    \caption{Phân tích SWOT nâng cao cho hệ thống CourtMate}
+    \label{tab:swot_expanded}
+\end{table}

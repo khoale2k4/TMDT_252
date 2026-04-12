@@ -1,0 +1,24 @@
+\section*{Phụ lục}
+\addcontentsline{toc}{section}{Phụ lục}
+
+\subsection*{Phụ lục A: Mã nguồn và hướng dẫn cài đặt}
+Toàn bộ mã nguồn nguồn của dự án được lưu trữ và quản lý phiên bản tại: \\
+\url{https://github.com/khoale2k4/TMDT_252} 
+
+\subsection*{Phụ lục B: Số liệu đối sánh chi phí và hiệu năng hạ tầng Cloud (Năm 2024)}
+Bảng số liệu dưới đây được thu thập từ bảng giá công bố chính thức của các nhà cung cấp nhằm chứng minh tính hợp lý của chiến lược Multi-Cloud được đề xuất tại Mục 5.1.
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabularx}{\textwidth}{|p{4.5cm}|X|X|X|}
+    \hline
+    \textbf{Tiêu chí so sánh} & \textbf{AWS (Singapore) \cite{ref:aws}} & \textbf{Bizfly Cloud (VN) \cite{ref:bizfly}} & \textbf{Viettel IDC (VN) \cite{ref:viettel}} \\ \hline
+    Độ trễ trung bình tới mạng VN & ~30 - 50ms & < 10ms & < 10ms \\ \hline
+    Cấu hình máy chủ tham chiếu & 2 vCPU, 4GB RAM & 2 vCPU, 4GB RAM & 2 vCPU, 4GB RAM \\ \hline
+    Đơn giá máy chủ ước tính/tháng & ~400.000 VNĐ & 300.000 VNĐ & 350.000 VNĐ \\ \hline
+    Chi phí băng thông Outbound & Miễn phí 100GB đầu, tính phí & Miễn phí & Miễn phí \\ \hline
+    \end{tabularx}
+    \caption{Bảng số liệu đối sánh thực tế giữa các nhà cung cấp hạ tầng Cloud}
+    \label{tab:appendix_cloud_stats_v2}
+\end{table}

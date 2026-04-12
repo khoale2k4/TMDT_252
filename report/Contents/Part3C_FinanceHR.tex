@@ -1,0 +1,92 @@
+\section{Quản trị tài chính và Nguồn lực}
+
+\subsection{Dự toán ngân sách hạ tầng Cloud}
+
+Nhóm thực hiện đánh giá chéo giữa các nhà cung cấp toàn cầu và nội địa nhằm tìm kiếm giải pháp cân bằng giữa chi phí vận hành, độ trễ phản hồi và tính ổn định của hạ tầng. Đây là bước chuẩn bị quan trọng để đảm bảo hệ thống CourtMate vận hành mượt mà ngay từ giai đoạn MVP.
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabularx}{\textwidth}{|p{3.5cm}|X|X|X|}
+    \hline
+    \textbf{Tiêu chí} & \textbf{AWS (Toàn cầu)} & \textbf{Viettel IDC (Nội địa)} & \textbf{Bizfly Cloud (Nội địa)} \\ \hline
+    Độ trễ nội địa (Latency) & Cao (30-50ms) & Thấp (<10ms) & Thấp (<10ms) \\ \hline
+    Chi phí Compute & Khá cao & Trung bình & Thấp (tối ưu nhất) \\ \hline
+    Managed Database & Rất trưởng thành & Đang phát triển & Đang phát triển \\ \hline
+    Chi phí Băng thông & Rất đắt (Outbound) & Miễn phí/Rẻ & Miễn phí/Rẻ \\ \hline
+    \end{tabularx}
+    \caption{Bảng so sánh năng lực hạ tầng giữa các nhà cung cấp Cloud}
+    \label{tab:cloud_comparison}
+\end{table}
+
+Dựa vào bảng so sánh trên, nhóm quyết định áp dụng chiến lược Multi-Cloud để tối ưu hóa hiệu năng hệ thống. Bizfly Cloud được lựa chọn để triển khai các cụm Compute (Microservices) nhằm tận dụng lợi thế về độ trễ cực thấp và chi phí vận hành rẻ \cite{ref:bizfly}. Đồng thời, dịch vụ Amazon RDS của AWS được sử dụng để quản lý Shared Database, đảm bảo tính toàn vẹn và an toàn tuyệt đối cho các dữ liệu giao dịch tài chính \cite{ref:aws}.
+
+(Chi tiết về thông số cấu hình và đơn giá thực tế của các nhà cung cấp vui lòng xem tại Phụ lục B)
+
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabularx}{\textwidth}{|X|p{4cm}|r|r|}
+    \hline
+    \textbf{Hạng mục} & \textbf{Nhà cung cấp} & \textbf{Đơn giá / Tháng} & \textbf{Tổng 12 tháng (VNĐ)} \\ \hline
+    Compute \& Microservices & Bizfly Cloud (Basic) & 300.000 & 3.600.000 \\ \hline
+    Managed Database & AWS (RDS db.t3.micro) & 450.000 & 5.400.000 \\ \hline
+    Storage \& CDN & AWS S3 \& Cloudflare & 150.000 & 1.800.000 \\ \hline
+    \hline
+    \textbf{Tổng chi phí dự kiến} & & & \textbf{10.800.000} \\ \hline
+    \end{tabularx}
+    \caption{Dự toán chi tiết hạ tầng Cloud năm thứ nhất (Bảng 3)}
+    \label{tab:cloud_budget_v2}
+\end{table}
+
+\subsection{Mô hình doanh thu SaaS}
+Nền tảng CourtMate vận hành theo mô hình B2B SaaS với cam kết 0\% hoa hồng trên mỗi lượt đặt sân. Thay vào đó, chủ sân sẽ chi trả một khoản phí duy trì hệ thống định kỳ:
+\begin{itemize}
+    \item \textbf{Gói Standard (Dưới 5 sân):} 299.000 VNĐ/tháng.
+    \item \textbf{Gói Enterprise (Trên 5 sân):} 499.000 VNĐ/tháng.
+\end{itemize}
+Mô hình này giúp chủ sân dễ dàng hoạch định chi phí cố định và thu hưởng toàn bộ lợi nhuận từ việc tối ưu hóa suất chơi.
+
+\subsection{Phân tích lợi nhuận và hoàn vốn}
+
+Dựa trên mô hình kinh doanh và dự toán chi phí, nhóm đưa ra bảng phân tích tài chính sơ bộ cho giai đoạn vận hành ổn định (Scale-up) như sau:
+
+\begin{itemize}
+    \item \textbf{Giả định vận hành:} Hệ thống đạt quy mô 80 cụm sân (tương đương 400 - 500 sân đơn lẻ). Tỷ lệ gói Enterprise chiếm 60\% và Standard chiếm 40\%.
+    
+    \item \textbf{Ước tính doanh thu hàng tháng:}
+    \begin{itemize}
+        \item Doanh thu từ phí SaaS: Khoảng 32.000.000 VNĐ.
+        \item Doanh thu từ hội viên Premium và quảng cáo: Ước tính 15.000.000 VNĐ.
+        \item \textbf{Tổng doanh thu:} 47.000.000 VNĐ / tháng.
+    \end{itemize}
+    
+    \item \textbf{Ước tính chi phí vận hành (Monthly OPEX):}
+    \begin{itemize}
+        \item Chi phí hạ tầng Cloud và API (Maps/SMS): 2.500.000 VNĐ.
+        \item Chi phí Marketing và phát triển thị trường: 10.000.000 VNĐ.
+        \item Chi phí vận hành, hỗ trợ kỹ thuật và quản lý: 15.000.000 VNĐ.
+        \item \textbf{Tổng chi phí:} 27.500.000 VNĐ / tháng.
+    \end{itemize}
+    
+    \item \textbf{Lợi nhuận và Điểm hòa vốn:}
+    \begin{itemize}
+        \item \textbf{Lợi nhuận ròng hàng tháng:} ~19.500.000 VNĐ.
+        \item \textbf{Phân tích hoàn vốn:} Với mức đầu tư phát triển ban đầu (nhân sự, nghiên cứu) ước tính 150 - 200 triệu VNĐ, dự án có thể đạt điểm hòa vốn sau khoảng 10 - 12 tháng vận hành.
+    \end{itemize}
+\end{itemize}
+
+Nhận xét: Mô hình SaaS với phí cố định giúp hệ thống có khả năng mở rộng (Scalability) rất tốt. Khi số lượng sân tăng lên, chi phí hạ tầng tăng không đáng kể so với tốc độ tăng trưởng doanh thu, giúp biên lợi nhuận ngày càng mở rộng.
+
+\subsection{Cơ cấu tổ chức nhân sự và Trách nhiệm (RACI)}
+Để đảm bảo tiến độ và chất lượng dự án, nhóm thực hiện được phân bổ theo mô hình chuyên môn hóa cao:
+
+\begin{itemize}
+    \item \textbf{Frontend Lead \& UX Engineer (Trần Minh Quân):} Phụ trách phát triển các giao diện phức tạp như Admin Grid (kéo-thả lịch), tích hợp biểu đồ (Chart.js/Recharts) và hiện thực các luồng người dùng quan trọng như xác thực (MFA, Refresh Token) và trải nghiệm booking.
+    \item \textbf{Frontend Developer (Nguyễn Đăng Khoa):} Xây dựng các giao diện người dùng chính bao gồm trang tìm kiếm sân với bản đồ, các form CRUD phức tạp (Venue, Court), màn hình quản lý Booking, check-in QR và hệ thống quản lý Review cho Admin.
+    \item \textbf{Backend Lead (Trần Thanh Phúc):} Thiết kế và hiện thực các API cốt lõi (Venue, Court, Booking), xây dựng Booking State Machine (cancel, refund, check-in, walk-in) và các dịch vụ báo cáo, lịch (Calendar Grid API).
+    \item \textbf{Security \& Integration Engineer (Phạm Văn Quốc Việt):} Phụ trách hệ thống xác thực và bảo mật (JWT, MFA, RBAC), xây dựng dịch vụ Pricing, xử lý Payment Webhook và tích hợp hệ thống hóa đơn (MISA).
+    \item \textbf{QA/QC \& DevOps (Lê Võ Đăng Khoa):} Triển khai CI/CD pipeline, thực hiện Load Testing và đảm bảo an ninh hệ thống.
+    \item \textbf{Backend Developer (Nguyễn Trần Bảo Khoa):} Phát triển các API liên quan đến Slot, Booking và Checkout, bao gồm cơ chế Lock Slot chống double booking và các dịch vụ tìm kiếm (nearby venues).
+\end{itemize}
