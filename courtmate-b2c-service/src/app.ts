@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/v1', routes);
+app.use('/v1', routes);
 
 // Global Error Handler
 app.use(errorHandler);
