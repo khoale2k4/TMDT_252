@@ -2,13 +2,13 @@ spring:
   application:
     name: courtmate-b2b-service
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/courtmate_b2b}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/courtmate-b2b-2}
     username: ${DATABASE_USER:postgres}
     password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -17,3 +17,18 @@ spring:
 
 server:
   port: 8081
+#  servlet:
+#    context-path: /api/v1
+
+jackson:
+  serialization:
+    write-dates-as-timestamps: false
+  time-zone: Asia/Ho_Chi_Minh
+  default-property-inclusion: non_null
+
+logging:
+  level:
+    root: INFO
+    vn.courtmate: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
