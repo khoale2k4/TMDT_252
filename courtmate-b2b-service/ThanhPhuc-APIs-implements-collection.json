@@ -1,0 +1,3603 @@
+{
+  "info": {
+    "_postman_id": "13a2b15c-f06c-4b59-a27a-9a7992a99e0d",
+    "name": "CourtMate Full API Collection",
+    "description": "Comprehensive collection for testing all CourtMate Microservices (B2C, B2B, AI) via Nginx Gateway.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34218171"
+  },
+  "item": [
+    {
+      "name": "01. Auth & Security",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data.access_token) {",
+                  "    pm.environment.set(\"jwt_token\", response.data.access_token);",
+                  "    console.log(\"JWT Token saved to environment variable\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@arena-q7.vn\",\n    \"password\": \"SecurePassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "MFA Verify",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mfa_session_token\": \"mfa_sess_abc123\",\n    \"otp_code\": \"847291\",\n    \"mfa_method\": \"totp\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refresh_token\": \"rt_9f3c1a7e2b...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refresh_token\": \"rt_9f3c1a7e2b...\",\n    \"logout_all_devices\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. B2C - Customer Platform",
+      "item": [
+        {
+          "name": "Search Nearby Venues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "?lat=10.7769&lng=106.7009&radius_km=5",
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "10.7769"
+                },
+                {
+                  "key": "lng",
+                  "value": "106.7009"
+                },
+                {
+                  "key": "radius_km",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Venue Slots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lock Slot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"expected_version\": 7,\n    \"lock_duration_minutes\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"booking_items\": [\n        {\n            \"slot_id\": \"s_001\",\n            \"lock_token\": \"lk_7f3d9e2a1b\"\n        }\n    ],\n    \"payment_method\": \"momo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03. Smart Admin - Operations",
+      "item": [
+        {
+          "name": "View Calendar Grid",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/admin/venues/10000000-0000-0000-0000-000000000001/calendar?date=2026-04-14",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "venues",
+                "10000000-0000-0000-0000-000000000001",
+                "calendar"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-04-14",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "View Calendar Grid",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8081/admin/venues/10000000-0000-0000-0000-000000000001/calendar?date=2026-04-14",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "venues",
+                    "10000000-0000-0000-0000-000000000001",
+                    "calendar"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2026-04-14"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 14 Apr 2026 10:28:00 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"date\": \"2026-04-14\",\n        \"courts\": [\n            {\n                \"slots\": [\n                    {\n                        \"date\": \"2026-04-14\",\n                        \"status\": \"maintenance\",\n                        \"version\": 3,\n                        \"slot_id\": \"9211d080-e6a9-4437-aa14-ba6aad0f8845\",\n                        \"start_time\": \"06:00\",\n                        \"end_time\": \"07:00\",\n                        \"base_price\": 100000,\n                        \"dynamic_price\": null\n                    },\n                    {\n                        \"date\": \"2026-04-14\",\n                        \"status\": \"maintenance\",\n                        \"version\": 3,\n                        \"slot_id\": \"eaf999be-8e6f-475b-bd2f-3a6dde2198f4\",\n                        \"start_time\": \"07:00\",\n                        \"end_time\": \"08:00\",\n                        \"base_price\": 100000,\n                        \"dynamic_price\": null\n                    },\n                    {\n                        \"date\": \"2026-04-14\",\n                        \"status\": \"maintenance\",\n                        \"version\": 3,\n                        \"slot_id\": \"b221db17-86f9-4c0f-88d3-fda1d5344c7a\",\n                        \"start_time\": \"08:00\",\n                        \"end_time\": \"09:00\",\n                        \"base_price\": 120000,\n                        \"dynamic_price\": null\n                    },\n                    {\n                        \"date\": \"2026-04-14\",\n                        \"status\": \"booked\",\n                        \"version\": 3,\n                        \"slot_id\": \"1d07f17c-bcef-454c-989b-451058c6d002\",\n                        \"start_time\": \"09:00\",\n                        \"end_time\": \"10:00\",\n                        \"base_price\": 120000,\n                        \"dynamic_price\": null\n                    },\n                    {\n                        \"date\": \"2026-04-14\",\n                        \"status\": \"maintenance\",\n                        \"version\": 4,\n                        \"slot_id\": \"937e7cb4-ace1-4d6a-8e38-fc69125fc2ac\",\n                        \"start_time\": \"10:00\",\n                        \"end_time\": \"11:00\",\n                        \"base_price\": 150000,\n                        \"dynamic_price\": null\n                    }\n                ],\n                \"court_id\": \"20000000-0000-0000-0000-000000000001\",\n                \"court_name\": \"Sân A1\"\n            }\n        ],\n        \"summary\": {\n            \"booked\": 1,\n            \"available\": 0,\n            \"locked\": 0,\n            \"maintenance\": 4,\n            \"total_slots\": 5,\n            \"occupancy_rate\": 20,\n            \"revenue_today\": 120000\n        },\n        \"venue_id\": \"10000000-0000-0000-0000-000000000001\"\n    },\n    \"timestamp\": \"2026-04-14T17:28:00.096885+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Slot (Reschedule/Cancel)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000003",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"expected_version\": 1,\n    \"action\": \"reschedule\",\n    \"reason\": \"Bảo trì xong sớm\",\n    \"new_slot_id\": \"00fb816c-a356-46cc-a1c0-cf40b5231350\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/slots/00fb816c-a356-46cc-a1c0-cf40b5231350",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "slots",
+                "00fb816c-a356-46cc-a1c0-cf40b5231350"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Update Slot (Reschedule/Cancel)",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000003",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"expected_version\": 2,\n    \"action\": \"reschedule\",\n    \"reason\": \"Khách yêu cầu\",\n    \"new_slot_id\": \"1d07f17c-bcef-454c-989b-451058c6d002\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/slots/00fb816c-a356-46cc-a1c0-cf40b5231350",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "slots",
+                    "00fb816c-a356-46cc-a1c0-cf40b5231350"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 14 Apr 2026 10:51:57 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"action\": \"reschedule\",\n        \"message\": \"Đổi lịch thành công.\",\n        \"slot_id\": \"f563e7f5-8f6c-40eb-b94c-4171340be90e\",\n        \"new_slot_id\": \"00fb816c-a356-46cc-a1c0-cf40b5231350\",\n        \"new_version\": 1,\n        \"audit_log_id\": \"b9570793-4ecc-4a7b-903b-fd73d31344ac\",\n        \"customer_notified\": false\n    },\n    \"timestamp\": \"2026-04-14T17:51:57.3358371+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Tạo Booking thủ công (Walk-in)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000004",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"customer\": {\r\n    \"phone\": \"0912345678\",\r\n    \"full_name\": \"Trần Thị C\",\r\n    \"user_id\": null\r\n  },\r\n  \"notes\": \"Khách vãng lai, cần thêm ghế\",\r\n  \"slot_id\": \"107263ee-24a2-4a97-ac5a-213e0619cd5c\",\r\n  \"expected_version\": 1,\r\n  \"payment_method\": \"cash\",\r\n  \"amount_paid\": 120000\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/bookings/walk-in",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "bookings",
+                "walk-in"
+              ],
+              "query": [
+                {
+                  "key": "payment_status",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sport_type",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "court_id",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Tạo Booking thủ công (Walk-in)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000004",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"customer\": {\r\n    \"phone\": \"0912345678\",\r\n    \"full_name\": \"Trần Thị C\",\r\n    \"user_id\": null\r\n  },\r\n  \"notes\": \"Khách vãng lai, cần thêm ghế\",\r\n  \"slot_id\": \"107263ee-24a2-4a97-ac5a-213e0619cd5c\",\r\n  \"expected_version\": 1,\r\n  \"payment_method\": \"cash\",\r\n  \"amount_paid\": 120000\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/bookings/walk-in",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "walk-in"
+                  ],
+                  "query": [
+                    {
+                      "key": "payment_status",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sport_type",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "court_id",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 20 Apr 2026 10:59:42 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"status\": \"confirmed\",\n        \"slot\": {\n            \"date\": \"2025-10-02\",\n            \"court_name\": \"Sân A1\",\n            \"start_time\": \"19:00\",\n            \"end_time\": \"20:00\"\n        },\n        \"booking_id\": \"ea036cf5-1940-46de-88f9-bc525c3b210b\",\n        \"payment_status\": \"paid\",\n        \"receipt_no\": \"RC20260420EA03\"\n    },\n    \"message\": \"Walk-in booking tạo thành công\",\n    \"timestamp\": \"2026-04-20T17:59:42.4936663+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Hủy Booking (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000003",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"reason\": \"Sân gặp sự cố kỹ thuật đột xuất\",\r\n  \"refund_policy\": \"none\",\r\n//   \"refund_amount\": 0,\r\n  \"notify_customer\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/bookings/ea036cf5-1940-46de-88f9-bc525c3b210b/cancel",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "bookings",
+                "ea036cf5-1940-46de-88f9-bc525c3b210b",
+                "cancel"
+              ],
+              "query": [
+                {
+                  "key": "payment_status",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sport_type",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "court_id",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Hủy Booking (Admin)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000003",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"reason\": \"Sân gặp sự cố kỹ thuật đột xuất\",\r\n  \"refund_policy\": \"none\",\r\n//   \"refund_amount\": 0,\r\n  \"notify_customer\": false\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/bookings/ea036cf5-1940-46de-88f9-bc525c3b210b/cancel",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "ea036cf5-1940-46de-88f9-bc525c3b210b",
+                    "cancel"
+                  ],
+                  "query": [
+                    {
+                      "key": "payment_status",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sport_type",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "court_id",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 20 Apr 2026 14:39:01 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"status\": \"cancelled\",\n        \"refund\": {\n            \"policy\": \"none\",\n            \"amount\": 0,\n            \"method\": \"N/A\",\n            \"estimated_refund_time\": null\n        },\n        \"booking_id\": \"ea036cf5-1940-46de-88f9-bc525c3b210b\",\n        \"customer_notified\": false,\n        \"audit_log_id\": \"5fcb473c-3c3c-46f8-aa6d-13a26305dc10\"\n    },\n    \"timestamp\": \"2026-04-20T21:39:01.2547226+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Check-in Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000004",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"checkin_method\": \"qr_scan\",\r\n  \"note\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/bookings/d74e5c7c-d519-4747-8f11-21b40bc82f01/checkin",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "bookings",
+                "d74e5c7c-d519-4747-8f11-21b40bc82f01",
+                "checkin"
+              ],
+              "query": [
+                {
+                  "key": "payment_status",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sport_type",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "court_id",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Check-in Booking",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000004",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"checkin_method\": \"qr_scan\",\r\n  \"note\": \"\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/bookings/d74e5c7c-d519-4747-8f11-21b40bc82f01/checkin",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "d74e5c7c-d519-4747-8f11-21b40bc82f01",
+                    "checkin"
+                  ],
+                  "query": [
+                    {
+                      "key": "payment_status",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sport_type",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "court_id",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 20 Apr 2026 14:59:55 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"slot\": {\n            \"court_name\": \"Sân A1\",\n            \"start_time\": \"06:00\",\n            \"end_time\": \"07:00\"\n        },\n        \"booking_id\": \"d74e5c7c-d519-4747-8f11-21b40bc82f01\",\n        \"checkin_status\": \"checked_in\",\n        \"checkin_at\": \"2026-04-20T21:59:55.0604718+07:00\",\n        \"checkin_by\": \"00000000-0000-0000-0000-000000000004\",\n        \"customer_name\": \"Khách vãng lai\"\n    },\n    \"message\": \"Check-in thành công\",\n    \"timestamp\": \"2026-04-20T21:59:55.0734693+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Báo cáo doanh thu Venue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/admin/reports/revenue?venueId=10000000-0000-0000-0000-000000000001&from=2025-10-01&to=2025-10-31",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "reports",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "venueId",
+                  "value": "10000000-0000-0000-0000-000000000001"
+                },
+                {
+                  "key": "from",
+                  "value": "2025-10-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2025-10-31"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Báo cáo doanh thu Venue",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/admin/reports/revenue?venueId=10000000-0000-0000-0000-000000000001&from=2025-10-01&to=2025-10-31",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "reports",
+                    "revenue"
+                  ],
+                  "query": [
+                    {
+                      "key": "venueId",
+                      "value": "10000000-0000-0000-0000-000000000001"
+                    },
+                    {
+                      "key": "from",
+                      "value": "2025-10-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2025-10-31"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 20 Apr 2026 16:00:43 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"from\": \"2025-10-01\",\n        \"to\": \"2025-10-31\",\n        \"venue_id\": \"10000000-0000-0000-0000-000000000001\",\n        \"venue_name\": \"Sân Pickleball Quận 7 Arena\",\n        \"total_revenue\": 350000,\n        \"total_bookings\": 3,\n        \"completed_bookings\": 2,\n        \"cancelled_bookings\": 1\n    },\n    \"timestamp\": \"2026-04-20T23:00:43.9034516+07:00\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04. Admin - Venue & Court Management",
+      "item": [
+        {
+          "name": "Tạo Venue mới",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000002",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\":        \"Sân Pickleball Quận 7 Arena\",\n  \"description\": \"Cụm sân PB hiện đại tại Quận 7 TP.HCM, có mái che.\",\n  \"address\":     \"123 Nguyễn Thị Thập, Quận 7, TP.HCM\",\n  \"lat\":         10.7301,\n  \"lng\":         106.7218,\n  \"phone\":       \"0901234567\",\n  \"email\":       \"info@arena-q7.vn\",\n  \"working_hours\": {\n    \"weekday\": { \"open\": \"06:00\", \"close\": \"22:00\" },\n    \"weekend\": { \"open\": \"05:30\", \"close\": \"23:00\" }\n  },\n  \"amenities\": [\"parking\", \"shower\", \"locker\", \"cafe\"],\n  \"bank_account\": {\n    \"bank_name\":      \"Vietcombank\",\n    \"account_number\": \"1234567890\",\n    \"account_holder\": \"NGUYEN VAN A\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/venues",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "venues"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Tạo Venue mới",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000002",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\":        \"Sân Pickleball Quận 7 Arena\",\n  \"description\": \"Cụm sân PB hiện đại tại Quận 7 TP.HCM, có mái che.\",\n  \"address\":     \"123 Nguyễn Thị Thập, Quận 7, TP.HCM\",\n  \"lat\":         10.7301,\n  \"lng\":         106.7218,\n  \"phone\":       \"0901234567\",\n  \"email\":       \"info@arena-q7.vn\",\n  \"working_hours\": {\n    \"weekday\": { \"open\": \"06:00\", \"close\": \"22:00\" },\n    \"weekend\": { \"open\": \"05:30\", \"close\": \"23:00\" }\n  },\n  \"amenities\": [\"parking\", \"shower\", \"locker\", \"cafe\"],\n  \"bank_account\": {\n    \"bank_name\":      \"Vietcombank\",\n    \"account_number\": \"1234567890\",\n    \"account_holder\": \"NGUYEN VAN A\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/venues",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "venues"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 13 Apr 2026 04:35:22 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"name\": \"Sân Pickleball Quận 7 Arena\",\n        \"slug\": \"san-pickleball-quan-7-arena\",\n        \"status\": \"active\",\n        \"venue_id\": \"7efc3efb-fdc8-4743-8918-bcda76445586\",\n        \"created_at\": \"2026-04-13T11:35:22.7051529+07:00\"\n    },\n    \"message\": \"Tạo venue thành công\",\n    \"timestamp\": \"2026-04-13T11:35:22.9031584+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cập nhật thông tin Venue",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000002",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Cụm sân mới nâng cấp, có mái che toàn bộ.\",\n  \"working_hours\": {\n    \"weekday\": { \"open\": \"05:30\", \"close\": \"23:00\" },\n    \"weekend\": { \"open\": \"05:00\", \"close\": \"23:30\" }\n  },\n  \"amenities\": [\"parking\", \"shower\", \"locker\", \"cafe\", \"ac\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/venues/82fedd31-316d-44bf-967d-f1fe2a5e6b3a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "venues",
+                "82fedd31-316d-44bf-967d-f1fe2a5e6b3a"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Cập nhật thông tin Venue",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000002",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"description\": \"Cụm sân mới nâng cấp, có mái che toàn bộ.\",\n  \"working_hours\": {\n    \"weekday\": { \"open\": \"05:30\", \"close\": \"23:00\" },\n    \"weekend\": { \"open\": \"05:00\", \"close\": \"23:30\" }\n  },\n  \"amenities\": [\"parking\", \"shower\", \"locker\", \"cafe\", \"ac\"]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/venues/82fedd31-316d-44bf-967d-f1fe2a5e6b3a",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "venues",
+                    "82fedd31-316d-44bf-967d-f1fe2a5e6b3a"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 13 Apr 2026 08:49:26 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"venue_id\": \"82fedd31-316d-44bf-967d-f1fe2a5e6b3a\",\n        \"updated_fields\": [\n            \"description\",\n            \"working_hours\",\n            \"amenities\"\n        ],\n        \"updated_at\": \"2026-04-13T08:49:10.53475Z\"\n    },\n    \"message\": \"Cập nhật thành công\",\n    \"timestamp\": \"2026-04-13T15:49:26.4286993+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Tạm đóng, mở lại Venue",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000002",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"closed\",\n  \"reason\": \"Sửa chữa cơ sở hạ tầng\",\n  \"reopen_at\": \"2026-04-20T06:00:00+07:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/venues/82fedd31-316d-44bf-967d-f1fe2a5e6b3a/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "venues",
+                "82fedd31-316d-44bf-967d-f1fe2a5e6b3a",
+                "status"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Đóng, mở Venue",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000002",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"closed\",\n  \"reason\": \"Sửa chữa cơ sở hạ tầng\",\n  \"reopen_at\": \"2026-04-20T06:00:00+07:00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/venues/82fedd31-316d-44bf-967d-f1fe2a5e6b3a/status",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "venues",
+                    "82fedd31-316d-44bf-967d-f1fe2a5e6b3a",
+                    "status"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 13 Apr 2026 09:00:44 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"message\": \"Venue đã closed. 0 booking sắp tới cần được xử lý.\",\n        \"venue_id\": \"82fedd31-316d-44bf-967d-f1fe2a5e6b3a\",\n        \"old_status\": \"active\",\n        \"new_status\": \"closed\",\n        \"reopen_at\": \"2026-04-20T06:00:00+07:00\",\n        \"affected_bookings\": 0\n    },\n    \"timestamp\": \"2026-04-13T16:00:44.7552474+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Tạo Court mới trong Venue",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000002",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"court_name\": \"Sân B3\", \n  \"sport_type\": \"pickleball\",\n  \"description\": \"Sân tiêu chuẩn quốc tế, nền nhựa PVC\",\n  \"base_price\": 120000,\n  \"surface_type\": \"pvc\",\n  \"has_lighting\": true,\n  \"has_roof\": true,\n  \"max_players\": 4, \n  \"images\": [\n    \"https://cdn.sportscourt.vn/courts/img1.jpg\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/venues/82fedd31-316d-44bf-967d-f1fe2a5e6b3a/courts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "venues",
+                "82fedd31-316d-44bf-967d-f1fe2a5e6b3a",
+                "courts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Tạo Court mới trong Venue",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000002",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"court_name\": \"Sân B3\", \n  \"sport_type\": \"pickleball\",\n  \"description\": \"Sân tiêu chuẩn quốc tế, nền nhựa PVC\",\n  \"base_price\": 120000,\n  \"surface_type\": \"pvc\",\n  \"has_lighting\": true,\n  \"has_roof\": true,\n  \"max_players\": 4, \n  \"images\": [\n    \"https://cdn.sportscourt.vn/courts/img1.jpg\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/venues/82fedd31-316d-44bf-967d-f1fe2a5e6b3a/courts",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "venues",
+                    "82fedd31-316d-44bf-967d-f1fe2a5e6b3a",
+                    "courts"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 13 Apr 2026 09:23:34 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"status\": \"active\",\n        \"court_id\": \"fe4a99d0-43c1-40d9-adc3-fdfeaeb4e6b6\",\n        \"court_name\": \"Sân B3\",\n        \"venue_id\": \"82fedd31-316d-44bf-967d-f1fe2a5e6b3a\",\n        \"sport_type\": \"pickleball\",\n        \"created_at\": \"2026-04-13T16:23:34.422973+07:00\"\n    },\n    \"message\": \"Tạo sân thành công\",\n    \"timestamp\": \"2026-04-13T16:23:34.5089027+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cập nhật Court",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000002",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"court_name\": \"Sân B3 (Nâng cấp)\",\n  \"base_price\": 140000,\n  \"has_lighting\": true,\n  \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/courts/fe4a99d0-43c1-40d9-adc3-fdfeaeb4e6b6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "courts",
+                "fe4a99d0-43c1-40d9-adc3-fdfeaeb4e6b6"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Cập nhật Court",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000002",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"court_name\": \"Sân B3 (Nâng cấp)\",\n  \"base_price\": 140000,\n  \"has_lighting\": true,\n  \"status\": \"active\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/courts/fe4a99d0-43c1-40d9-adc3-fdfeaeb4e6b6",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "courts",
+                    "fe4a99d0-43c1-40d9-adc3-fdfeaeb4e6b6"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 13 Apr 2026 09:26:58 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"court_id\": \"fe4a99d0-43c1-40d9-adc3-fdfeaeb4e6b6\",\n        \"updated_fields\": [\n            \"court_name\",\n            \"base_price\"\n        ],\n        \"updated_at\": \"2026-04-13T09:23:34.447907Z\"\n    },\n    \"message\": \"Cập nhật sân thành công\",\n    \"timestamp\": \"2026-04-13T16:26:58.8412314+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Xóa Court",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000002",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"court_name\": \"Sân B3 (Nâng cấp)\",\n  \"base_price\": 140000,\n  \"has_lighting\": true,\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/courts/fe4a99d0-43c1-40d9-adc3-fdfeaeb4e6b6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "courts",
+                "fe4a99d0-43c1-40d9-adc3-fdfeaeb4e6b6"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cập nhật giá hàng loạt",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000003",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date_from\": \"2025-10-01\",\n  \"date_to\": \"2025-10-31\",\n  \"time_from\": \"17:00\",\n  \"time_to\": \"21:00\",\n  \"apply_to_days\": [\"saturday\", \"sunday\"],\n  \"new_price\": 180000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/courts/20000000-0000-0000-0000-000000000001/slots/bulk-update-price",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "courts",
+                "20000000-0000-0000-0000-000000000001",
+                "slots",
+                "bulk-update-price"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Cập nhật giá hàng loạt",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000003",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date_from\": \"2025-10-01\",\n  \"date_to\": \"2025-10-31\",\n  \"time_from\": \"17:00\",\n  \"time_to\": \"21:00\",\n  \"apply_to_days\": [\"saturday\", \"sunday\"],\n  \"new_price\": 180000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/courts/20000000-0000-0000-0000-000000000001/slots/bulk-update-price",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "courts",
+                    "20000000-0000-0000-0000-000000000001",
+                    "slots",
+                    "bulk-update-price"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 14 Apr 2026 04:59:21 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"updated_count\": 24,\n        \"new_price\": 180000,\n        \"message\": \"Đã cập nhật giá cho 24 slot.\"\n    },\n    \"timestamp\": \"2026-04-14T11:59:21.8642208+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Đặt trạng thái Maintenance hàng loạt",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000003",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date_from\": \"2025-10-20\",\n  \"date_to\": \"2025-10-22\",\n  \"time_from\": \"06:00\",\n  \"time_to\": \"22:00\",\n  \"new_status\": \"maintenance\",\n  \"reason\": \"Thay mặt sân và căng lại lưới\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/courts//admin/courts/{court_id}/slots/bulk-set-status/slots/bulk-set-status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "courts",
+                "",
+                "admin",
+                "courts",
+                "{court_id}",
+                "slots",
+                "bulk-set-status",
+                "slots",
+                "bulk-set-status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách Booking của Venue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/admin/venues/10000000-0000-0000-0000-000000000001/bookings",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "venues",
+                "10000000-0000-0000-0000-000000000001",
+                "bookings"
+              ],
+              "query": [
+                {
+                  "key": "payment_status",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sport_type",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "court_id",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Danh sách Booking của Venue",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/admin/venues/10000000-0000-0000-0000-000000000001/bookings",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "venues",
+                    "10000000-0000-0000-0000-000000000001",
+                    "bookings"
+                  ],
+                  "query": [
+                    {
+                      "key": "payment_status",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sport_type",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "court_id",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 14 Apr 2026 15:13:25 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"bookings\": [\n            {\n                \"customer\": {\n                    \"phone\": \"0912345678\",\n                    \"user_id\": \"00000000-0000-0000-0000-000000000005\",\n                    \"full_name\": \"Lê Khoa\"\n                },\n                \"court\": null,\n                \"slot\": null,\n                \"status\": \"pending_payment\",\n                \"booking_id\": \"40000000-0000-0000-0000-000000000001\",\n                \"booking_type\": \"single\",\n                \"total_amount\": 120000,\n                \"payment_status\": \"unpaid\",\n                \"has_add_ons\": false,\n                \"has_delivery\": false,\n                \"created_at\": \"2026-04-13T03:45:43.342919Z\"\n            },\n            {\n                \"customer\": {\n                    \"phone\": \"0912345678\",\n                    \"user_id\": \"00000000-0000-0000-0000-000000000005\",\n                    \"full_name\": \"Lê Khoa\"\n                },\n                \"court\": null,\n                \"slot\": null,\n                \"status\": \"confirmed\",\n                \"booking_id\": \"40000000-0000-0000-0000-000000000002\",\n                \"booking_type\": \"single\",\n                \"total_amount\": 120000,\n                \"payment_status\": \"unpaid\",\n                \"has_add_ons\": false,\n                \"has_delivery\": false,\n                \"created_at\": \"2026-04-13T03:45:43.342919Z\"\n            },\n            {\n                \"customer\": {\n                    \"phone\": \"0912345678\",\n                    \"user_id\": \"00000000-0000-0000-0000-000000000005\",\n                    \"full_name\": \"Lê Khoa\"\n                },\n                \"court\": null,\n                \"slot\": null,\n                \"status\": \"completed\",\n                \"booking_id\": \"40000000-0000-0000-0000-000000000003\",\n                \"booking_type\": \"single\",\n                \"total_amount\": 120000,\n                \"payment_status\": \"unpaid\",\n                \"has_add_ons\": false,\n                \"has_delivery\": false,\n                \"created_at\": \"2026-04-13T03:45:43.342919Z\"\n            }\n        ],\n        \"pagination\": {\n            \"page\": 1,\n            \"total\": 3,\n            \"total_pages\": 1\n        },\n        \"summary\": {\n            \"total_confirmed\": 2,\n            \"total_cancelled\": 0,\n            \"total_pending\": 1,\n            \"total_revenue\": 240000\n        }\n    },\n    \"timestamp\": \"2026-04-14T22:13:25.6639441+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Chi tiết một Booking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/admin/bookings/40000000-0000-0000-0000-000000000002",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "bookings",
+                "40000000-0000-0000-0000-000000000002"
+              ],
+              "query": [
+                {
+                  "key": "payment_status",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sport_type",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "court_id",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Chi tiết một Booking",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/admin/bookings/40000000-0000-0000-0000-000000000002",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "40000000-0000-0000-0000-000000000002"
+                  ],
+                  "query": [
+                    {
+                      "key": "payment_status",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sport_type",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "court_id",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 14 Apr 2026 16:00:54 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"customer\": {\n            \"phone\": \"0912345678\",\n            \"email\": \"khoa@gmail.com\",\n            \"user_id\": \"00000000-0000-0000-0000-000000000005\",\n            \"full_name\": \"Lê Khoa\",\n            \"total_bookings\": 3\n        },\n        \"court\": null,\n        \"slot\": null,\n        \"status\": \"confirmed\",\n        \"payment\": null,\n        \"delivery\": null,\n        \"invoice\": null,\n        \"notes\": \"Booking đã xác nhận thành công\",\n        \"booking_id\": \"40000000-0000-0000-0000-000000000002\",\n        \"booking_type\": \"single\",\n        \"add_ons\": [],\n        \"created_at\": \"2026-04-13T03:45:43.342919Z\"\n    },\n    \"timestamp\": \"2026-04-14T23:00:53.9283114+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Xuất hóa đơn cho Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000003",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"customer\": {\r\n    \"phone\": \"0912345678\",\r\n    \"full_name\": \"Trần Thị C\",\r\n    \"user_id\": null\r\n  },\r\n  \"notes\": \"Khách vãng lai, cần thêm ghế\",\r\n  \"slot_id\": \"107263ee-24a2-4a97-ac5a-213e0619cd5c\",\r\n  \"expected_version\": 1,\r\n  \"payment_method\": \"cash\",\r\n  \"amount_paid\": 120000\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/bookings/40000000-0000-0000-0000-000000000003/invoice",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "bookings",
+                "40000000-0000-0000-0000-000000000003",
+                "invoice"
+              ],
+              "query": [
+                {
+                  "key": "payment_status",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sport_type",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "court_id",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Xuất hóa đơn cho Booking",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000003",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"customer\": {\r\n    \"phone\": \"0912345678\",\r\n    \"full_name\": \"Trần Thị C\",\r\n    \"user_id\": null\r\n  },\r\n  \"notes\": \"Khách vãng lai, cần thêm ghế\",\r\n  \"slot_id\": \"107263ee-24a2-4a97-ac5a-213e0619cd5c\",\r\n  \"expected_version\": 1,\r\n  \"payment_method\": \"cash\",\r\n  \"amount_paid\": 120000\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/bookings/40000000-0000-0000-0000-000000000003/invoice",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "40000000-0000-0000-0000-000000000003",
+                    "invoice"
+                  ],
+                  "query": [
+                    {
+                      "key": "payment_status",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sport_type",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "court_id",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 20 Apr 2026 15:29:31 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"status\": \"issued\",\n        \"invoice_id\": \"2690a06e-c03c-4cef-917f-888d6c43764e\",\n        \"booking_id\": \"40000000-0000-0000-0000-000000000003\",\n        \"misa_invoice_no\": \"INV-1776698971857\",\n        \"pdf_url\": \"/invoices/INV-1776698971857.pdf\",\n        \"issued_at\": null\n    },\n    \"message\": \"Xuất hoá đơn thành công\",\n    \"timestamp\": \"2026-04-20T22:29:31.991725+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Chi tiết Invoice của Booking",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000003",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"customer\": {\r\n    \"phone\": \"0912345678\",\r\n    \"full_name\": \"Trần Thị C\",\r\n    \"user_id\": null\r\n  },\r\n  \"notes\": \"Khách vãng lai, cần thêm ghế\",\r\n  \"slot_id\": \"107263ee-24a2-4a97-ac5a-213e0619cd5c\",\r\n  \"expected_version\": 1,\r\n  \"payment_method\": \"cash\",\r\n  \"amount_paid\": 120000\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/bookings/40000000-0000-0000-0000-000000000003/invoice",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "bookings",
+                "40000000-0000-0000-0000-000000000003",
+                "invoice"
+              ],
+              "query": [
+                {
+                  "key": "payment_status",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sport_type",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "court_id",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Chi tiết Invoice của Booking",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000003",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"customer\": {\r\n    \"phone\": \"0912345678\",\r\n    \"full_name\": \"Trần Thị C\",\r\n    \"user_id\": null\r\n  },\r\n  \"notes\": \"Khách vãng lai, cần thêm ghế\",\r\n  \"slot_id\": \"107263ee-24a2-4a97-ac5a-213e0619cd5c\",\r\n  \"expected_version\": 1,\r\n  \"payment_method\": \"cash\",\r\n  \"amount_paid\": 120000\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/bookings/40000000-0000-0000-0000-000000000003/invoice",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "40000000-0000-0000-0000-000000000003",
+                    "invoice"
+                  ],
+                  "query": [
+                    {
+                      "key": "payment_status",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sport_type",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "court_id",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 20 Apr 2026 15:34:07 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"status\": \"issued\",\n        \"invoice_id\": \"2690a06e-c03c-4cef-917f-888d6c43764e\",\n        \"booking_id\": \"40000000-0000-0000-0000-000000000003\",\n        \"misa_invoice_no\": \"INV-1776698971857\",\n        \"pdf_url\": \"/invoices/INV-1776698971857.pdf\",\n        \"issued_at\": \"2026-04-20T15:29:31.949398Z\"\n    },\n    \"timestamp\": \"2026-04-20T22:34:07.7479935+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Danh sách Invoices (filter)",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000004",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"customer\": {\r\n    \"phone\": \"0912345678\",\r\n    \"full_name\": \"Trần Thị C\",\r\n    \"user_id\": null\r\n  },\r\n  \"notes\": \"Khách vãng lai, cần thêm ghế\",\r\n  \"slot_id\": \"107263ee-24a2-4a97-ac5a-213e0619cd5c\",\r\n  \"expected_version\": 1,\r\n  \"payment_method\": \"cash\",\r\n  \"amount_paid\": 120000\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/invoices?date_from=2026-04-01&date_to=2026-04-30",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "invoices"
+              ],
+              "query": [
+                {
+                  "key": "date_from",
+                  "value": "2026-04-01",
+                  "type": "text"
+                },
+                {
+                  "key": "date_to",
+                  "value": "2026-04-30",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "40000000",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Danh sách Invoices (filter)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000004",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"customer\": {\r\n    \"phone\": \"0912345678\",\r\n    \"full_name\": \"Trần Thị C\",\r\n    \"user_id\": null\r\n  },\r\n  \"notes\": \"Khách vãng lai, cần thêm ghế\",\r\n  \"slot_id\": \"107263ee-24a2-4a97-ac5a-213e0619cd5c\",\r\n  \"expected_version\": 1,\r\n  \"payment_method\": \"cash\",\r\n  \"amount_paid\": 120000\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/invoices?date_from=2026-04-01&date_to=2026-04-30",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "invoices"
+                  ],
+                  "query": [
+                    {
+                      "key": "date_from",
+                      "value": "2026-04-01"
+                    },
+                    {
+                      "key": "date_to",
+                      "value": "2026-04-30"
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": "40000000",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 20 Apr 2026 15:39:17 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"invoices\": [\n            {\n                \"total\": 120000,\n                \"status\": \"issued\",\n                \"invoice_id\": \"2690a06e-c03c-4cef-917f-888d6c43764e\",\n                \"booking_id\": \"40000000-0000-0000-0000-000000000003\",\n                \"misa_invoice_no\": \"INV-1776698971857\",\n                \"buyer_name\": \"Lê Khoa\",\n                \"pdf_url\": \"/invoices/INV-1776698971857.pdf\",\n                \"issued_at\": \"2026-04-20T15:29:31.949398Z\"\n            }\n        ],\n        \"pagination\": {\n            \"page\": 1,\n            \"total\": 1,\n            \"total_pages\": 1\n        }\n    },\n    \"timestamp\": \"2026-04-20T22:39:17.8787551+07:00\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05. Admin - Slot Management",
+      "item": [
+        {
+          "name": "Bulk Generate Slots",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000003",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"date_from\": \"2025-10-01\",\n    \"date_to\": \"2025-10-31\",\n    \"time_slots\": [\n        { \"start\": \"06:00\", \"end\": \"07:00\" },\n        { \"start\": \"07:00\", \"end\": \"08:00\" },\n        { \"start\": \"08:00\", \"end\": \"09:00\" },\n        { \"start\": \"17:00\", \"end\": \"18:00\" },\n        { \"start\": \"18:00\", \"end\": \"19:00\" },\n        { \"start\": \"19:00\", \"end\": \"20:00\" }\n\n    ],\n    \"apply_to_days\": [\"monday\",\"tuesday\",\"wednesday\",\"thursday\",\"friday\"],\n    \"base_price\": 120000,\n    \"skip_existing\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/courts/20000000-0000-0000-0000-000000000001/slots/bulk-generate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "courts",
+                "20000000-0000-0000-0000-000000000001",
+                "slots",
+                "bulk-generate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Xem danh sách Slot của một Court",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "00000000-0000-0000-0000-000000000003",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date_from\": \"2025-10-20\",\n  \"date_to\": \"2025-10-22\",\n  \"time_from\": \"06:00\",\n  \"time_to\": \"22:00\",\n  \"new_status\": \"maintenance\",\n  \"reason\": \"Thay mặt sân và căng lại lưới\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/admin/courts/20000000-0000-0000-0000-000000000001/slots?dateFrom=2025-10-01&dateTo=2025-10-31&status=available",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "courts",
+                "20000000-0000-0000-0000-000000000001",
+                "slots"
+              ],
+              "query": [
+                {
+                  "key": "dateFrom",
+                  "value": "2025-10-01",
+                  "type": "text"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2025-10-31",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "available",
+                  "type": "text"
+                },
+                {
+                  "key": "size",
+                  "value": "2",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Xem danh sách Slot của một Court",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "X-User-Id",
+                    "value": "00000000-0000-0000-0000-000000000003",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date_from\": \"2025-10-20\",\n  \"date_to\": \"2025-10-22\",\n  \"time_from\": \"06:00\",\n  \"time_to\": \"22:00\",\n  \"new_status\": \"maintenance\",\n  \"reason\": \"Thay mặt sân và căng lại lưới\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8081/admin/courts/20000000-0000-0000-0000-000000000001/slots?dateFrom=2025-10-01&dateTo=2025-10-31&status=available",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "courts",
+                    "20000000-0000-0000-0000-000000000001",
+                    "slots"
+                  ],
+                  "query": [
+                    {
+                      "key": "dateFrom",
+                      "value": "2025-10-01"
+                    },
+                    {
+                      "key": "dateTo",
+                      "value": "2025-10-31"
+                    },
+                    {
+                      "key": "status",
+                      "value": "available"
+                    },
+                    {
+                      "key": "size",
+                      "value": "2",
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 14 Apr 2026 09:50:44 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"slots\": [\n            {\n                \"date\": \"2025-10-01\",\n                \"status\": \"available\",\n                \"version\": 2,\n                \"slot_id\": \"ef600f8d-cb73-4aa5-ba46-3a89869b0584\",\n                \"start_time\": \"06:00\",\n                \"end_time\": \"07:00\",\n                \"base_price\": 130000,\n                \"dynamic_price\": null\n            },\n            {\n                \"date\": \"2025-10-01\",\n                \"status\": \"available\",\n                \"version\": 2,\n                \"slot_id\": \"09eeff38-714c-4a09-af67-255418e1ba51\",\n                \"start_time\": \"07:00\",\n                \"end_time\": \"08:00\",\n                \"base_price\": 130000,\n                \"dynamic_price\": null\n            }\n        ],\n        \"pagination\": {\n            \"page\": 1,\n            \"total\": 186,\n            \"total_pages\": 93\n        },\n        \"court_id\": \"20000000-0000-0000-0000-000000000001\"\n    },\n    \"timestamp\": \"2026-04-14T16:50:44.6496133+07:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Xem thông tin chi tiết Slot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/admin/slots/2aa87bd0-4472-44e4-9cc7-ddff1e4b7e5c",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "admin",
+                "slots",
+                "2aa87bd0-4472-44e4-9cc7-ddff1e4b7e5c"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Xem thông tin chi tiết Slot",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/admin/slots/2aa87bd0-4472-44e4-9cc7-ddff1e4b7e5c",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "admin",
+                    "slots",
+                    "2aa87bd0-4472-44e4-9cc7-ddff1e4b7e5c"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Method"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Access-Control-Request-Headers"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 20 Apr 2026 16:25:08 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"date\": \"2025-10-02\",\n        \"status\": \"booked\",\n        \"price\": 120000,\n        \"version\": 2,\n        \"slot_id\": \"2aa87bd0-4472-44e4-9cc7-ddff1e4b7e5c\",\n        \"court_id\": \"20000000-0000-0000-0000-000000000001\",\n        \"court_name\": \"Sân A1\",\n        \"start_time\": \"06:00\",\n        \"end_time\": \"07:00\"\n    },\n    \"timestamp\": \"2026-04-20T23:25:08.086039+07:00\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06. AI - Dynamic Pricing",
+      "item": [
+        {
+          "name": "Calculate Dynamic Prices (Internal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Internal-Service-Key",
+                "value": "secret-key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"venue_id\": \"v_9f2a1b3c\",\n    \"date\": \"2025-07-15\",\n    \"slot_ids\": [\"s_001\", \"s_002\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "venue_id",
+      "value": "10000000-0000-0000-0000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "court_id",
+      "value": "20000000-0000-0000-0000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "slot_id",
+      "value": "s_001",
+      "type": "string"
+    }
+  ]
+}
