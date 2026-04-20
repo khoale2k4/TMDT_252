@@ -1,4 +1,4 @@
-import prisma from '../src/config/prisma'; // Hoặc '../config/prisma' tùy vị trí file seed của bạn
+import prisma from '../src/config/prisma'; 
 
 async function main() {
   console.log('Bắt đầu làm sạch database...');
@@ -8,7 +8,7 @@ async function main() {
   await prisma.court.deleteMany();
   await prisma.venue.deleteMany();
 
-  console.log('1. Đang nạp 10 Venue để test API 1 (Nearby)...');
+  console.log('1. Đang nạp 10 Venue để test...');
   await prisma.venue.createMany({
     data: [
       {
@@ -137,30 +137,34 @@ async function main() {
   });
 
   console.log('4. Đang tạo các Slot (Khung giờ trống) cho toàn bộ API...');
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const testDate = tomorrow.toISOString().split('T')[0];
+  
+  // Set testDate là ngày hôm nay (today) để test API 5 cho tiện
+  const today = new Date();
+  const testDate = today.toISOString().split('T')[0];
 
   // Tính các mốc thời gian
   const lockedUntilTime = new Date();
   lockedUntilTime.setMinutes(lockedUntilTime.getMinutes() + 15);
 
   const validCheckoutTime = new Date();
-  validCheckoutTime.setMinutes(validCheckoutTime.getMinutes() + 10); // Còn hạn 10 phút
+  validCheckoutTime.setMinutes(validCheckoutTime.getMinutes() + 10);
 
   const expiredCheckoutTime = new Date();
-  expiredCheckoutTime.setMinutes(expiredCheckoutTime.getMinutes() - 5); // Đã hết hạn 5 phút trước
+  expiredCheckoutTime.setMinutes(expiredCheckoutTime.getMinutes() - 5);
 
-  // Lấy ID user từ file Auth Middleware của bạn để mock
   const MOCK_USER_ID = '11111111-1111-1111-1111-111111111111';
 
   await prisma.slot.createMany({
     data: [
-      // --- SLOTS ĐỂ TEST API 2 ---
+      // --- SLOTS CỦA SÂN THỐNG NHẤT (DÙNG TEST API 5) ---
       { id: 's_1', court_id: 'c_thongnhat_1', date: testDate, start_time: '18:00', end_time: '19:00', status: 'available', price: 60000, version: 1 },
       { id: 's_2', court_id: 'c_thongnhat_1', date: testDate, start_time: '19:00', end_time: '20:00', status: 'booked', price: 60000, version: 2, booking_id: 'booking_da_thanh_toan_123' },
+      
+      // --- SLOTS CỦA SÂN PHÚ MỸ HƯNG ---
       { id: 's_3', court_id: 'c_phumyhung_1', date: testDate, start_time: '06:00', end_time: '07:00', status: 'available', price: 300000, version: 1 }, 
       { id: 's_4', court_id: 'c_phumyhung_2', date: testDate, start_time: '07:00', end_time: '08:00', status: 'available', price: 150000, version: 1 }, 
+      
+      // --- SLOTS CỦA SÂN DĨ AN ---
       { id: 's_5', court_id: 'c_dian_1', date: testDate, start_time: '19:00', end_time: '20:30', status: 'available', price: 250000, version: 1 },
 
       // --- SLOTS ĐỂ TEST API 3 (LOCK SLOT) ---
@@ -168,8 +172,7 @@ async function main() {
       { id: 's_api3_locked', court_id: 'c_thongnhat_2', date: testDate, start_time: '09:00', end_time: '10:00', status: 'locked', price: 60000, version: 2, locked_by: 'user_khac', locked_until: lockedUntilTime },
       { id: 's_api3_conflict', court_id: 'c_thongnhat_2', date: testDate, start_time: '10:00', end_time: '11:00', status: 'available', price: 60000, version: 5 },
 
-      // --- SLOTS MỚI CHUYÊN DÙNG ĐỂ TEST API 4 (CHECKOUT) ---
-      // Slot 4.1: Thành công
+      // --- SLOTS ĐỂ TEST API 4 (CHECKOUT) ---
       { 
         id: 's_api4_ready', 
         court_id: 'c_thongnhat_2', 
@@ -183,8 +186,6 @@ async function main() {
         locked_until: validCheckoutTime,
         lock_token: 'valid_token_777' 
       },
-
-      // Slot 4.2: Lỗi Hết hạn
       { 
         id: 's_api4_expired', 
         court_id: 'c_thongnhat_2', 
@@ -198,8 +199,6 @@ async function main() {
         locked_until: expiredCheckoutTime, 
         lock_token: 'expired_token_888'
       },
-
-      // Slot 4.3: Lỗi Sai Token
       { 
         id: 's_api4_wrong_token', 
         court_id: 'c_thongnhat_2', 
@@ -217,23 +216,22 @@ async function main() {
   });
 
   console.log('✅ SEED HOÀN TẤT!');
-  console.log(`\n📌 DÙNG THÔNG TIN NÀY TEST API 4 (CHECKOUT) BẰNG POSTMAN:`);
-  console.log(`
-  URL: POST http://localhost:3000/v1/checkouts
-  Body (JSON):
-  {
-    "booking_items": [
-      {
-        "slot_id": "s_api4_ready",
-        "lock_token": "valid_token_777"
-      }
-    ],
-    "add_ons": [ { "product_id": "p_racket_001", "quantity": 2 } ],
-    "delivery": { "required": true, "address": "123 Lê Văn Lương", "lat": 10.7, "lng": 106.7, "delivery_time": "2025-07-15T07:30:00+07:00" },
-    "payment_method": "momo",
-    "coupon_code": "SUMMER2025"
-  }
-  `);
+  console.log('\n======================================================');
+  console.log('📌 COPY CÁC LINK SAU DÁN VÀO POSTMAN ĐỂ TEST API 5:');
+  console.log('======================================================\n');
+  
+  console.log('👉 Test 1: Xem chi tiết Sân Cầu Lông Thống Nhất (Sẽ có 8 Slots)');
+  console.log(`GET http://localhost:3000/v1/venues/11111111-1111-1111-1111-111111111111\n`);
+  
+  console.log('👉 Test 2: Xem chi tiết Sân Phú Mỹ Hưng (Sẽ có 2 Slots)');
+  console.log(`GET http://localhost:3000/v1/venues/55555555-5555-5555-5555-555555555555\n`);
+
+  console.log('👉 Test 3: Xem chi tiết sân có kèm ngày (Truyền ngày hiện tại của bạn vào)');
+  console.log(`GET http://localhost:3000/v1/venues/11111111-1111-1111-1111-111111111111?date=${testDate}\n`);
+  
+  console.log('👉 Test 4: Bắn ID sai (Sẽ ra lỗi 404)');
+  console.log(`GET http://localhost:3000/v1/venues/id_nay_khong_ton_tai_dau\n`);
+
 }
 
 main()
