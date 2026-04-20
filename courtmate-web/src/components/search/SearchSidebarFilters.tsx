@@ -126,7 +126,7 @@ export default function SearchSidebarFilters({
       >
         <div>
           <FieldLabel htmlFor="radius-km">Bán kính tìm kiếm</FieldLabel>
-          <input id="radius-km" name="radius_km" type="number" min={1} max={RADIUS_MAX} defaultValue={getParam("radius_km") || "5"} className={INPUT_CLASS_NAME} />
+          <input id="radius-km" name="radius_km" type="number" min={1} max={RADIUS_MAX} defaultValue={getParam("radius_km") || "10"} className={INPUT_CLASS_NAME} />
           <p className="mt-1 text-[11px] text-slate-500">Tối đa {RADIUS_MAX}km</p>
         </div>
 
