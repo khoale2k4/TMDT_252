@@ -139,3 +139,42 @@ export const getVenueSlots = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+export const getVenueDetail = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const venue_id = req.params.venue_id;
+    
+    // 1. LẤY RAW DATE & XỬ LÝ MẢNG (Nếu FE truyền 2 lần date, lấy cái đầu tiên)
+    const rawDate = req.query.date;
+    let dateQuery: string | undefined = undefined;
+
+    if (rawDate) {
+      dateQuery = Array.isArray(rawDate) ? String(rawDate[0]) : String(rawDate);
+    }
+
+    // 2. VALIDATE ĐỊNH DẠNG NGÀY (Chặn "hom-nay-dep-troi")
+    // Dùng Regex để ép buộc định dạng YYYY-MM-DD
+    if (dateQuery) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(dateQuery)) {
+        return res.status(400).json({
+          error: {
+            code: "INVALID_DATE_FORMAT",
+            message: "Định dạng ngày không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD."
+          }
+        });
+      }
+    }
+
+    // 3. TRUYỀN VÀO SERVICE SAU KHI ĐÃ LÀM SẠCH VÀ VALIDATE
+    const result = await venueService.getVenueDetailService(venue_id, dateQuery);
+
+    return res.status(200).json(result); 
+
+  } catch (error: any) {
+    if (error.status === 404) {
+      return res.status(404).json({ error: error.message });
+    }
+    next(error);
+  }
+};
