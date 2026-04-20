@@ -7,8 +7,8 @@ export const API_ENDPOINTS = {
   },
   VENUES: {
     LIST: '/venues',
-    DETAILS: (id: string) => `/venues/${id}`,
-    SEARCH: '/venues/search',
+    SLOT: (id: string) => `/venues/${id}/slots`,
+    NEARBY: '/venues/nearby',
   },
   BOOKINGS: {
     CREATE: '/bookings',

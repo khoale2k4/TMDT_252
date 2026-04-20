@@ -32,7 +32,7 @@ export const getNearby = async (req: Request, res: Response, next: NextFunction)
 
     // Validate giới hạn bán kính tối đa 50km
     if (isNaN(radiusNum) || radiusNum < 0 || radiusNum > 50) {
-       return res.status(400).json({
+      return res.status(400).json({
         error: {
           code: "INVALID_RADIUS",
           message: "Bán kính (radius_km) phải trong khoảng [0, 50]."
@@ -40,14 +40,14 @@ export const getNearby = async (req: Request, res: Response, next: NextFunction)
       });
     }
 
-    
+
     const result = await venueService.getNearbyVenuesService(req.query);
 
     return res.status(200).json({
       data: result
     });
   } catch (error) {
-    next(error); 
+    next(error);
   }
 };
 
@@ -56,14 +56,14 @@ export const getVenueSlots = async (req: Request, res: Response): Promise<void> 
     const venue_id = req.params.venue_id as string;
     const { date_from, date_to, sport_type } = req.query;
 
-    if (!date_from || !date_to) {
-      res.status(400).json({ error: 'Thiếu tham số bắt buộc: date_from hoặc date_to' });
-      return;
-    }
+    // if (!date_from || !date_to) {
+    //   res.status(400).json({ error: 'Thiếu tham số bắt buộc: date_from hoặc date_to' });
+    //   return;
+    // }
 
     const from = new Date(date_from as string);
     const to = new Date(date_to as string);
-    
+
     if (from > to) {
       res.status(400).json({ error: 'Khoảng thời gian không hợp lệ: date_from không được lớn hơn date_to.' });
       return;
@@ -94,7 +94,7 @@ export const getVenueSlots = async (req: Request, res: Response): Promise<void> 
     const courts = await prisma.court.findMany({
       where: {
         venue_id: venue_id,
-        
+
         ...(parsedSportType ? { sport_type: parsedSportType } : {})
       },
       include: {
