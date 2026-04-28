@@ -1,4 +1,4 @@
-export type Venue = {
+﻿export type Venue = {
   venue_id: string;
   name: string;
   address: string;

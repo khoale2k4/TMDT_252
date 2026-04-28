@@ -142,8 +142,8 @@ export const getVenueSlots = async (req: Request, res: Response): Promise<void> 
 
 export const getVenueDetail = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const venue_id = req.params.venue_id;
-    
+    const venue_id = req.params.venue_id as string;
+
     // 1. LẤY RAW DATE & XỬ LÝ MẢNG (Nếu FE truyền 2 lần date, lấy cái đầu tiên)
     const rawDate = req.query.date;
     let dateQuery: string | undefined = undefined;
@@ -169,7 +169,7 @@ export const getVenueDetail = async (req: Request, res: Response, next: NextFunc
     // 3. TRUYỀN VÀO SERVICE SAU KHI ĐÃ LÀM SẠCH VÀ VALIDATE
     const result = await venueService.getVenueDetailService(venue_id, dateQuery);
 
-    return res.status(200).json(result); 
+    return res.status(200).json(result);
 
   } catch (error: any) {
     if (error.status === 404) {

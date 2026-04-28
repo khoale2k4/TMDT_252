@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import axiosClient from "@/services/axiosClient";
 import API_ENDPOINTS from "@/services/apiEndpoints";
-import type { VenueSlotsData } from "@/components/search/VenueMapBubble";
+import type { VenueSlotsData } from "@/types/slot";
 
-const formatDateParam = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
+// const formatDateParam = (date: Date) => {
+//   const year = date.getFullYear();
+//   const month = String(date.getMonth() + 1).padStart(2, "0");
+//   const day = String(date.getDate()).padStart(2, "0");
+//   return `${year}-${month}-${day}`;
+// };
 
 type UseVenueSlotsResult = {
   selectedVenueSlots: VenueSlotsData | null;
@@ -46,12 +46,12 @@ export default function useVenueSlots(selectedVenueId: string | null): UseVenueS
       try {
         const res = await axiosClient.get<{ data?: VenueSlotsData; venue_id?: string; courts?: VenueSlotsData["courts"] }>(
           API_ENDPOINTS.VENUES.SLOT(selectedVenueId),
-          {
-            params: {
-              date_from: formatDateParam(dateFrom),
-              date_to: formatDateParam(dateTo),
-            },
-          }
+          // {
+          // params: {
+          //   date_from: formatDateParam(dateFrom),
+          //   date_to: formatDateParam(dateTo),
+          // },
+          // }
         );
 
         const normalized = res.data?.data || {

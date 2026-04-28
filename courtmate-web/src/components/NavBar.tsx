@@ -47,10 +47,12 @@ export default function NavBar() {
 
       <nav className="relative bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl ring-1 ring-slate-900/5 dark:ring-white/10 rounded-full flex justify-between items-center px-3 sm:px-5 md:px-8 py-2 sm:py-3">
         <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
-          <div className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-600 dark:bg-blue-500 shadow-md shadow-blue-500/30 overflow-hidden transform -rotate-6 group-hover:rotate-0 transition-transform duration-300 shrink-0">
-            <div className="absolute inset-0 border-2 border-white/20 rounded-lg m-1" />
-            <div className="absolute w-full h-0.5 bg-white/40 top-1/2 -translate-y-1/2" />
-            <div className="absolute w-3 h-3 border-2 border-white/40 rounded-full" />
+          <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12">
+            <img
+              src="/courtmate_favicon.png"
+              alt="CourtMate Logo"
+              className="w-full h-full object-contain drop-shadow-md"
+            />
           </div>
           <span className="hidden md:block text-xl lg:text-2xl font-bold italic tracking-tighter bg-linear-to-r from-blue-600 to-yellow-500 bg-clip-text text-transparent dark:from-blue-400 dark:to-yellow-400  pr-1">
             CourtMate

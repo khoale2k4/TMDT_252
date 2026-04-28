@@ -2,7 +2,10 @@
 
 import { MapPin, Users, Zap } from "lucide-react";
 import type { ReactNode } from "react";
+import { useLoadScript } from "@react-google-maps/api";
 import SearchBar from "./HeroSearchBar";
+
+const mapLibraries: ("places" | "marker")[] = ["places", "marker"];
 
 interface StatCardProps {
   icon: ReactNode;
@@ -31,6 +34,12 @@ const stats = [
 ];
 
 export default function HeroSection() {
+  const { isLoaded: isGoogleMapsLoaded, loadError: googleMapsLoadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    libraries: mapLibraries,
+    version: "weekly",
+  });
+
   return (
     <section className="relative min-h-[90vh] overflow-hidden bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.14),transparent_36%),radial-gradient(circle_at_80%_20%,rgba(251,191,36,0.16),transparent_30%),linear-gradient(180deg,#f8fbff_0%,#ffffff_48%,#f8fafc_100%)] px-6 py-20 md:px-12 md:py-28">
       <div className="absolute -top-24 right-[4%] h-80 w-80 rounded-full bg-amber-300/25 blur-3xl pointer-events-none" />
@@ -55,7 +64,7 @@ export default function HeroSection() {
         </p>
 
         <div className="mt-10 w-full max-w-5xl">
-          <SearchBar />
+          <SearchBar isGoogleMapsLoaded={isGoogleMapsLoaded} googleMapsLoadError={googleMapsLoadError} />
         </div>
 
         <div className="mt-12 grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">

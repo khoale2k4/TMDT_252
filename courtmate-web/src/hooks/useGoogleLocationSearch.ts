@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
 const DEFAULT_REGION_CODES = ["vn"] as const;
 
 type Coordinates = {
@@ -115,13 +116,13 @@ export default function useGoogleLocationSearch({
 
       sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
     } catch (error) {
-      console.error("Lỗi lay toa do:", error);
+      console.error("Lỗi lấy tọa độ:", error);
     }
   };
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert("Trình duyệt của bạn không hỗ trợ định vị.");
+      toast.error("Trình duyệt của bạn không hỗ trợ định vị.");
       return;
     }
 
@@ -153,10 +154,10 @@ export default function useGoogleLocationSearch({
         }
       },
       (error) => {
-        console.error("Lỗi lay vi tri GPS:", error);
+        console.error("Lỗi lấy vị trí GPS:", error);
         setLocation("");
         setIsLoadingAddress(false);
-        alert("Khong the lay vi tri. Vui long kiem tra quyen truy cap vi tri tren trinh duyet.");
+        toast.error("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập vị trí trên trình duyệt.");
       }
     );
   };
