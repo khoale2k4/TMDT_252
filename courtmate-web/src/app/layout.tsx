@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
+import ToastProvider from "./ToastProvider";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam-pro",
@@ -25,8 +26,10 @@ export default function RootLayout({
       className={`${beVietnamPro.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <NavBar />
-        {children}
+        <ToastProvider>
+          <NavBar />
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

@@ -1,26 +1,6 @@
 import Link from "next/link";
-
-type Slot = {
-  slot_id: string;
-  date: string;
-  start_time: string;
-  end_time: string;
-  status: "available" | "booked";
-  price: number;
-  version: number;
-};
-
-type Court = {
-  court_id: string;
-  court_name: string;
-  sport_type: string;
-  slots: Slot[];
-};
-
-export type VenueSlotsData = {
-  venue_id: string;
-  courts: Court[];
-};
+import { getSportTypeLabel } from '@/types/search';
+import type { VenueSlotsData } from "@/types/slot";
 
 type VenueMapBubbleProps = {
   data: VenueSlotsData;
@@ -61,7 +41,7 @@ export default function VenueMapBubble({ data, onClose }: VenueMapBubbleProps) {
             <div className="mb-3 flex items-center justify-between">
               <h4 className="font-semibold text-blue-700">{court.court_name}</h4>
               <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600">
-                {court.sport_type}
+                {getSportTypeLabel(court.sport_type)}
               </span>
             </div>
 

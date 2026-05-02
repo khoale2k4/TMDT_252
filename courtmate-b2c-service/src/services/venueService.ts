@@ -19,13 +19,13 @@ interface RawVenueRecord {
 
 export const getNearbyVenuesService = async (query: any) => {
   const page = parseInt(query.page as string) || 1;
-  const limit = Math.min(parseInt(query.limit as string) || 20, 50); 
+  const limit = Math.min(parseInt(query.limit as string) || 20, 50);
   const offset = (page - 1) * limit;
 
   const repoParams: venueRepository.NearbyVenueParams = {
     lat: parseFloat(query.lat as string),
     lng: parseFloat(query.lng as string),
-    radiusKm: Math.min(parseFloat(query.radius_km as string), 50), 
+    radiusKm: Math.min(parseFloat(query.radius_km as string), 50),
     sportTypes: query.sport_types ? (query.sport_types as string).split(',') : undefined,
     sortBy: query.sort_by as string,
     limit,
@@ -42,7 +42,7 @@ export const getNearbyVenuesService = async (query: any) => {
     distance_km: parseFloat(v.distance_km.toFixed(2)),
     sport_types: v.sport_types,
     amenities: v.amenities,
-    courts_available: 3, 
+    courts_available: 3,
     price_range: {
       min: v.min_price,
       max: v.max_price
@@ -52,8 +52,8 @@ export const getNearbyVenuesService = async (query: any) => {
       total_reviews: v.total_reviews
     },
     cover_image_url: v.cover_image_url,
-    is_open_now: true, 
-    next_available_slot: new Date().toISOString() 
+    is_open_now: true,
+    next_available_slot: new Date().toISOString()
   }));
 
   return {
@@ -79,35 +79,34 @@ export const getVenueDetailService = async (venueId: string, dateQuery?: string)
   const slots = await venueRepository.getSlotsByVenueAndDate(venueId, date);
 
   const availableSlots = slots.filter((s: any) => s.status === 'available');
-  
-  const nextSlot = availableSlots.length > 0 
-    ? `${availableSlots[0].date}T${availableSlots[0].start_time}:00+07:00` 
+
+  const nextSlot = availableSlots.length > 0
+    ? `${availableSlots[0].date}T${availableSlots[0].start_time}:00+07:00`
     : null;
 
   // Format trả về đúng ý FE
   return {
-    venues: [
-      {
-        venue_id: venue.id,
-        name: venue.name,
-        address: venue.address,
-        distance_km: 1.24, // Mock tĩnh
-        sport_types: venue.sport_types,
-        amenities: venue.amenities,
-        courts_available: availableSlots.length,
-        price_range: {
-          min: venue.min_price,
-          max: venue.max_price
-        },
-        rating: {
-          average: venue.rating_avg,
-          total_reviews: venue.total_reviews
-        },
-        cover_image_url: venue.cover_image_url,
-        is_open_now: true, 
-        next_available_slot: nextSlot
-      }
-    ],
+    venues:
+    {
+      venue_id: venue.id,
+      name: venue.name,
+      address: venue.address,
+      distance_km: 1.24, // Mock tĩnh
+      sport_types: venue.sport_types,
+      amenities: venue.amenities,
+      courts_available: availableSlots.length,
+      price_range: {
+        min: venue.min_price,
+        max: venue.max_price
+      },
+      rating: {
+        average: venue.rating_avg,
+        total_reviews: venue.total_reviews
+      },
+      cover_image_url: venue.cover_image_url,
+      is_open_now: true,
+      next_available_slot: nextSlot
+    },
     slots: slots.map((s: any) => ({
       slot_id: s.id,
       date: s.date,

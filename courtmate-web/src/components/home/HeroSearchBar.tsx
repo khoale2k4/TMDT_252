@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MapPin, Navigation, Search, X } from "lucide-react";
+import { toast } from "react-toastify";
 import Button from "../Button";
 import useGoogleLocationSearch from "@/hooks/useGoogleLocationSearch";
 
@@ -23,7 +24,15 @@ const dropdownArrowStyle = {
   backgroundPosition: "right 12px center"
 };
 
-export default function SearchBar() {
+interface HeroSearchBarProps {
+  isGoogleMapsLoaded?: boolean;
+  googleMapsLoadError?: Error | undefined;
+}
+
+export default function SearchBar({
+  isGoogleMapsLoaded,
+  googleMapsLoadError
+}: HeroSearchBarProps) {
   const router = useRouter();
   const [sport, setSport] = useState("");
   const [date, setDate] = useState("");
@@ -41,12 +50,15 @@ export default function SearchBar() {
     selectSuggestion,
     getCurrentLocation,
     clearLocation,
-  } = useGoogleLocationSearch();
+  } = useGoogleLocationSearch({
+    isGoogleMapsLoaded,
+    googleMapsLoadError,
+  });
   const today = new Date().toISOString().split("T")[0];
 
   const handleSearch = () => {
     if (!coordinates) {
-      alert("Vui lòng chọn địa điểm từ gợi ý hoặc dùng nút Gần tôi để lấy tọa độ.");
+      toast.error("Vui lòng chọn địa điểm từ gợi ý hoặc dùng nút Gần tôi để lấy tọa độ.");
       return;
     }
 
