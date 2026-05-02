@@ -66,3 +66,56 @@ export const getNearbyVenuesService = async (query: any) => {
     }
   };
 };
+
+export const getVenueDetailService = async (venueId: string, dateQuery?: string) => {
+  // Lấy venue
+  const venue = await venueRepository.getVenueById(venueId);
+  if (!venue) {
+    throw { status: 404, message: "Không tìm thấy sân (Venue)." };
+  }
+
+  // Lấy slots (nếu FE không truyền date, tự lấy ngày hôm nay)
+  const date = dateQuery || new Date().toISOString().split('T')[0];
+  const slots = await venueRepository.getSlotsByVenueAndDate(venueId, date);
+
+  const availableSlots = slots.filter((s: any) => s.status === 'available');
+  
+  const nextSlot = availableSlots.length > 0 
+    ? `${availableSlots[0].date}T${availableSlots[0].start_time}:00+07:00` 
+    : null;
+
+  // Format trả về đúng ý FE
+  return {
+    venues: [
+      {
+        venue_id: venue.id,
+        name: venue.name,
+        address: venue.address,
+        distance_km: 1.24, // Mock tĩnh
+        sport_types: venue.sport_types,
+        amenities: venue.amenities,
+        courts_available: availableSlots.length,
+        price_range: {
+          min: venue.min_price,
+          max: venue.max_price
+        },
+        rating: {
+          average: venue.rating_avg,
+          total_reviews: venue.total_reviews
+        },
+        cover_image_url: venue.cover_image_url,
+        is_open_now: true, 
+        next_available_slot: nextSlot
+      }
+    ],
+    slots: slots.map((s: any) => ({
+      slot_id: s.id,
+      date: s.date,
+      start_time: s.start_time,
+      end_time: s.end_time,
+      status: s.status,
+      price: s.price,
+      version: s.version
+    }))
+  };
+};

@@ -64,3 +64,23 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
     total: countResult[0]?.total || 0
   };
 };
+export const getVenueById = async (venueId: string) => {
+  return prisma.venue.findUnique({
+    where: { id: venueId }
+  });
+};
+
+// Lấy tất cả Slot của Venue trong 1 ngày cụ thể
+export const getSlotsByVenueAndDate = async (venueId: string, date: string) => {
+  return prisma.slot.findMany({
+    where: {
+      date: date,
+      court: {
+        venue_id: venueId
+      }
+    },
+    orderBy: [
+      { start_time: 'asc' }
+    ]
+  });
+};
