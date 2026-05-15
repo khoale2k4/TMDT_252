@@ -2,21 +2,31 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, Loader2, User, Trophy } from 'lucide-react';
+import { Mail, Lock, Loader2, User, Trophy, Phone } from 'lucide-react';
 
 export default function AuthPage() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+  
+  // Các state khớp với Database
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Giả lập gọi API Backend
+    // Payload chuẩn bị gửi lên API Backend
+    const payload = isLogin 
+      ? { email, password } 
+      : { email, password, full_name: fullName, phone };
+
+    console.log("Dữ liệu gửi lên API:", payload);
+
+    // Giả lập gọi API Backend (Vì backend chưa viết Route này)
     setTimeout(() => {
       localStorage.setItem('token', 'dev-token-123');
       router.push('/');
@@ -33,15 +43,12 @@ export default function AuthPage() {
         backgroundPosition: "center"
       }}
     >
-      {/* Lớp phủ mờ toàn màn hình để làm Form nổi bật hơn */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
 
-      {/* Thẻ Form tổng */}
       <div className="flex w-full max-w-[900px] rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative z-10 bg-white md:bg-transparent">
         
-        {/* Nửa bên trái - Hiệu ứng kính mờ (Glassmorphism) nhìn xuyên ra background */}
+        {/* Nửa bên trái - Glassmorphism */}
         <div className="hidden md:flex flex-col justify-between w-1/2 p-10 relative text-white bg-black/30 backdrop-blur-md border-r border-white/10">
-          
           <div className="relative z-10 flex flex-col items-center text-center mt-12">
             <div className="text-yellow-400 mb-4 drop-shadow-lg">
               <Trophy size={64} strokeWidth={1.5} />
@@ -66,10 +73,9 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Nửa bên phải - Form đăng nhập/đăng ký màu trắng */}
+        {/* Nửa bên phải - Form màu trắng */}
         <div className="w-full md:w-1/2 p-8 sm:p-12 relative bg-white flex flex-col justify-center">
           
-          {/* Nút gạt Đăng nhập / Đăng ký */}
           <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
             <button
               type="button"
@@ -97,18 +103,33 @@ export default function AuthPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">Họ và tên</label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
-                  <input
-                    type="text" required
-                    value={name} onChange={(e) => setName(e.target.value)}
-                    className="block w-full rounded-xl border border-slate-300 pl-11 py-2.5 text-sm focus:border-[#2a7a62] focus:ring-[#2a7a62] outline-none transition"
-                    placeholder="Nguyễn Văn A"
-                  />
+              <>
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-700 mb-1">Họ và tên</label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                    <input
+                      type="text" required
+                      value={fullName} onChange={(e) => setFullName(e.target.value)}
+                      className="block w-full rounded-xl border border-slate-300 pl-11 py-2.5 text-sm focus:border-[#2a7a62] focus:ring-[#2a7a62] outline-none transition"
+                      placeholder="Nguyễn Văn A"
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div>
+                  <label className="block text-[13px] font-medium text-slate-700 mb-1">Số điện thoại</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                    <input
+                      type="tel" required
+                      value={phone} onChange={(e) => setPhone(e.target.value)}
+                      className="block w-full rounded-xl border border-slate-300 pl-11 py-2.5 text-sm focus:border-[#2a7a62] focus:ring-[#2a7a62] outline-none transition"
+                      placeholder="0901234567"
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <div>
