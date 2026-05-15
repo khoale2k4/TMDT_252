@@ -13,6 +13,7 @@ import {
   Smartphone,
   Wallet,
 } from 'lucide-react';
+import axiosClient from '@/services/axiosClient';
 import Button from '@/components/Button';
 import type { BookingDraft } from '@/types/booking';
 
@@ -133,10 +134,33 @@ export default function CheckoutPage() {
     setStep((currentStep) => (currentStep === 3 ? 2 : 1));
   };
 
-  const handleFinish = () => {
-    sessionStorage.removeItem(STORAGE_KEY);
-    router.push(`/venues/${draft?.venueId || ''}`);
+  const handleFinish = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        booking_items: draft?.slotIds.map((id) => ({
+          slot_id: id,
+          lock_token: 'mock_lk_token' 
+        })),
+        add_ons: [],
+        delivery: { required: false },
+        payment_method: paymentMethod,
+        coupon_code: ''
+      };
+
+      await axiosClient.post('/checkouts', payload);
+      
+      sessionStorage.removeItem(STORAGE_KEY);
+      router.push(`/venues/${draft?.venueId || ''}`);
+    } catch (error) {
+      console.error('Lỗi thanh toán:', error);
+      sessionStorage.removeItem(STORAGE_KEY);
+      router.push(`/venues/${draft?.venueId || ''}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   if (isLoading) {
     return (
