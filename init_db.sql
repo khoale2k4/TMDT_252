@@ -176,6 +176,39 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     performed_by UUID REFERENCES users(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS refresh_token (
+                               id BIGSERIAL PRIMARY KEY,
+                               token VARCHAR(255) NOT NULL UNIQUE,
+                               expiry_date TIMESTAMPTZ NOT NULL,
+                               user_id BIGINT NOT NULL,
+                               CONSTRAINT fk_user_refresh_token
+                                   FOREIGN KEY (user_id)
+                                       REFERENCES users(id)
+                                       ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS user_venue (
+                            user_id UUID NOT NULL,
+                            venue_id UUID NOT NULL,
+
+
+    -- Khóa chính phức hợp (Composite Primary Key) đảm bảo 1 user không bị gán trùng 1 sân
+                            PRIMARY KEY (user_id, venue_id),
+
+    -- Khóa ngoại liên kết tới bảng users
+                            CONSTRAINT fk_user_venue_user
+                                FOREIGN KEY (user_id)
+                                    REFERENCES users(id)
+                                    ON DELETE CASCADE,
+
+    -- Khóa ngoại liên kết tới bảng venues (giả định bảng của bạn tên là venues)
+                            CONSTRAINT fk_user_venue_venue
+                                FOREIGN KEY (venue_id)
+                                    REFERENCES venues(id)
+                                    ON DELETE CASCADE
+);
+
+-- Tạo Index để tìm kiếm token nhanh hơn
+CREATE INDEX idx_refresh_token_value ON refresh_token(token);
 
 -- Create Indexes
 CREATE INDEX idx_venues_status ON venues(status);
