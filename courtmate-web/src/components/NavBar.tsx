@@ -39,6 +39,7 @@ const inactiveNavLinkClasses =
 
 export default function NavBar() {
   const pathname = usePathname();
+  if (pathname === '/login' || pathname === '/register') return null; 
   const isActive = (path: string) => pathname === path;
 
   return (
@@ -80,14 +81,17 @@ export default function NavBar() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <Button
-              title="Đăng nhập"
-              variant="secondary"
-              className="gap-1 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm"
-            >
-              <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden sm:inline">Đăng nhập</span>
-            </Button>
+            <Link href="/login">
+              <Button
+                title="Đăng nhập"
+                variant="secondary"
+                className="gap-1 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm"
+              >
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="hidden sm:inline">Đăng nhập</span>
+              </Button>
+            </Link>
+
 
             <Button variant="primary" className="hidden sm:flex px-4 py-2 text-sm">
               <ShieldCheck className="w-4 h-4 shrink-0" />
