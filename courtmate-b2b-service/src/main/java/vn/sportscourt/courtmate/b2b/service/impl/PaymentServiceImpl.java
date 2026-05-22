@@ -17,6 +17,9 @@ import vn.sportscourt.courtmate.b2b.repository.PricingRulesRepository;
 import vn.sportscourt.courtmate.b2b.service.MisaService;
 import vn.sportscourt.courtmate.b2b.service.PaymentService;
 
+import vn.sportscourt.courtmate.b2b.statemachine.BookingStateMachineService;
+import vn.sportscourt.courtmate.b2b.events.BookingEvent;
+
 import java.util.Optional;
 
 @Service
@@ -26,6 +29,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final BookingRepository bookingRepository;
     private final MisaService misaService;
     private final PaymentRepository paymentRepository;
+    private final BookingStateMachineService stateMachineService;
     @Transactional
     public void processPaymentSuccess(PaymentRequest request) {
         // 2. Kiểm tra trùng lặp
@@ -37,7 +41,10 @@ public class PaymentServiceImpl implements PaymentService {
 //        bookingRepository.updateStatus(request.getOrderId(), BookingStatus.confirmed, request.getTransId());
         Optional<Booking> tmp = bookingRepository.findById(request.getOrderId());
         Booking temp = tmp.get();
-        temp.setStatus(BookingStatus.confirmed);
+        
+        BookingStatus newStatus = stateMachineService.transition(temp.getId(), temp.getStatus(), BookingEvent.PAY);
+        temp.setStatus(newStatus);
+        
         bookingRepository.save(temp);
         Payment a = paymentRepository.findByBooking_Id(request.getOrderId());
         System.out.println(a.getId());

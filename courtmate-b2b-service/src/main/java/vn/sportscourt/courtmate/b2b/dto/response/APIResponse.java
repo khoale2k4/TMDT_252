@@ -6,6 +6,15 @@ import lombok.Data;
 
 import java.time.OffsetDateTime;
 
+/**
+ * Standard success response envelope.
+ * {
+ *   "success": true,
+ *   "data": { ... },
+ *   "message": "Thành công",
+ *   "timestamp": "2025-..."
+ * }
+ */
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)

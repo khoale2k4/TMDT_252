@@ -15,7 +15,7 @@ import java.util.UUID;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
-    Optional<Invoice> findByBookingId(UUID bookingId);
+    Optional<Invoice> findByBooking_Id(UUID bookingId);
 
     @Override
     boolean existsById(UUID uuid);
