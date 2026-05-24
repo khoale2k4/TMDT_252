@@ -42,6 +42,8 @@ public interface SlotRepository extends JpaRepository<Slot, UUID> {
 
     List<Slot> findByCourtIdAndDate(UUID courtId, LocalDate date);
 
+    List<Slot> findByCourtIdAndDateAndStartTimeAndEndTime(UUID courtId, LocalDate date, java.time.LocalTime startTime, java.time.LocalTime endTime);
+
     @Query("""
         SELECT s FROM Slot s
         WHERE s.court.id = :courtId

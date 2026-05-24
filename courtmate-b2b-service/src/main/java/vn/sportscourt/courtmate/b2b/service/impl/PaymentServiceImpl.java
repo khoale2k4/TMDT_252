@@ -32,20 +32,33 @@ public class PaymentServiceImpl implements PaymentService {
     private final BookingStateMachineService stateMachineService;
     @Transactional
     public void processPaymentSuccess(PaymentRequest request) {
-        // 2. Kiểm tra trùng lặp
-//        if (invoiceRepository.existsById(request.getOrderId())) {
-//            return;
-//        }
-//
-//        // 4 & 5. Update DB
-//        bookingRepository.updateStatus(request.getOrderId(), BookingStatus.confirmed, request.getTransId());
+        // 2. Kiểm tra Idempotency (Tránh xử lý webhook nhiều lần)
         Optional<Booking> tmp = bookingRepository.findById(request.getOrderId());
+        if (tmp.isEmpty()) {
+            throw new RuntimeException("Booking not found: " + request.getOrderId());
+        }
+        
         Booking temp = tmp.get();
-        
-        BookingStatus newStatus = stateMachineService.transition(temp.getId(), temp.getStatus(), BookingEvent.PAY);
-        temp.setStatus(newStatus);
-        
-        bookingRepository.save(temp);
+        if (temp.getStatus() == BookingStatus.confirmed || temp.getStatus() == BookingStatus.completed) {
+            // Đã xử lý thành công trước đó -> Bỏ qua để Controller trả về HTTP 200
+            System.out.println("Webhook Idempotency: Booking " + temp.getId() + " is already confirmed. Skipping.");
+            return;
+        }
+
+        // 3. Xử lý TTL Expiration (Trễ Webhook)
+        // Nếu slot đã bị mất do trễ 10 phút, thì trạng thái slot sẽ available.
+        // Ở đây chúng ta tạm transition status. Nếu có lỗi (slot bị người khác lấy), 
+        // sẽ cần handle đưa booking về trạng thái chờ đối soát.
+        try {
+            BookingStatus newStatus = stateMachineService.transition(temp.getId(), temp.getStatus(), BookingEvent.PAY);
+            temp.setStatus(newStatus);
+            bookingRepository.save(temp);
+        } catch (Exception e) {
+            // Xử lý khi slot đã bị lấy / booking không thể transition sang CONFIRMED
+            System.err.println("Lỗi Webhook trễ / Slot đã mất: " + e.getMessage());
+            // TODO: Chuyển booking sang trạng thái chờ hoàn tiền/đối soát
+            throw e;
+        }
         Payment a = paymentRepository.findByBooking_Id(request.getOrderId());
         System.out.println(a.getId());
         a.setStatus(PaymentStatus.paid);

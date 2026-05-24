@@ -61,6 +61,12 @@ public class Booking {
     @Column(name = "updated_at")
     OffsetDateTime updatedAt;
 
+    @Column(name = "recurring_group_id")
+    UUID recurringGroupId;
+
+    @Column(name = "recurring_frequency")
+    String recurringFrequency; // "weekly", "monthly", "none"
+
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     List<BookingItem> items;
 
