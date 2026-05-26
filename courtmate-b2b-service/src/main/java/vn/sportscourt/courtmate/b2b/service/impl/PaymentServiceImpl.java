@@ -19,8 +19,10 @@ import vn.sportscourt.courtmate.b2b.service.PaymentService;
 
 import vn.sportscourt.courtmate.b2b.statemachine.BookingStateMachineService;
 import vn.sportscourt.courtmate.b2b.events.BookingEvent;
+import vn.sportscourt.courtmate.b2b.service.SseService;
 
 import java.util.Optional;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final MisaService misaService;
     private final PaymentRepository paymentRepository;
     private final BookingStateMachineService stateMachineService;
+    private final SseService sseService;
     @Transactional
     public void processPaymentSuccess(PaymentRequest request) {
         // 2. Kiểm tra Idempotency (Tránh xử lý webhook nhiều lần)
@@ -53,6 +56,11 @@ public class PaymentServiceImpl implements PaymentService {
             BookingStatus newStatus = stateMachineService.transition(temp.getId(), temp.getStatus(), BookingEvent.PAY);
             temp.setStatus(newStatus);
             bookingRepository.save(temp);
+            
+            if (temp.getVenue() != null) {
+                sseService.sendEventToVenue(temp.getVenue().getId(), "UPDATE_BOOKING", 
+                    Map.of("bookingId", temp.getId(), "status", newStatus.name()));
+            }
         } catch (Exception e) {
             // Xử lý khi slot đã bị lấy / booking không thể transition sang CONFIRMED
             System.err.println("Lỗi Webhook trễ / Slot đã mất: " + e.getMessage());
@@ -70,7 +78,7 @@ public class PaymentServiceImpl implements PaymentService {
 //        callAhamoveApi(request);
 
         // 8. Gọi MISA meInvoice
-//        MisaResponse misa = misaService.callMisaApi(request);
+        misaService.syncInvoice(temp, request);
 //
 //        // 9. Lưu thông tin hóa đơn
 //        Invoice invoice = new Invoice();

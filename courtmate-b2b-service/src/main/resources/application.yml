@@ -2,9 +2,9 @@ spring:
   application:
     name: courtmate-b2b-service
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/postgres}
-    username: ${DATABASE_USER:postgres}
-    password: ${DATABASE_PASSWORD:denn231264}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/courtmate}
+    username: ${DATABASE_USER:lekhoa}
+    password: ${DATABASE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -46,3 +46,19 @@ logging:
     vn.courtmate: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      misa:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        permittedNumberOfCallsInHalfOpenState: 2
+        waitDurationInOpenState: 10000ms
+        failureRateThreshold: 50
+  retry:
+    instances:
+      misa:
+        maxRetryAttempts: 3
+        waitDuration: 2000ms
