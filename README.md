@@ -62,22 +62,31 @@ graph TD
 - [Java 17+](https://adoptium.net/)
 - [Python 3.10+](https://www.python.org/)
 
-### 1. Run via Docker Compose (Recommended)
+### 1. Run via Docker Compose (Cách tối ưu cho lần đầu chạy)
 
-The easiest way to start the entire system is using Docker:
+Cách đơn giản nhất để khởi chạy toàn bộ 6 dịch vụ (bao gồm cả DB, Gateway, Frontend, B2B, B2C, AI Pricing) chỉ với một lệnh duy nhất:
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-| Service | Local URL |
+> **Lưu ý:** Lần chạy đầu tiên sẽ mất chút thời gian để Docker tải các image (Node, Java, Postgres) và build các service.
+
+Sau khi chạy xong, bạn có thể truy cập các dịch vụ tại:
+
+| Dịch vụ | URL Nội bộ / Truy cập |
 | :--- | :--- |
-| **API Gateway** | `http://localhost/api/v1` |
-| **Frontend** | `http://localhost:3001` |
-| **B2C Service** | `http://localhost:3000` |
-| **B2B Service** | `http://localhost:8081` |
-| **AI Pricing** | `http://localhost:8000` |
-| **Database** | `localhost:5432` |
+| **Frontend Web** | `http://localhost:3001` (Trang chính cho người dùng & Admin) |
+| **API Gateway** | `http://localhost/api/v1` (Điều phối mọi request) |
+| **B2C Service** | `http://localhost:3000` (Node.js) |
+| **B2B Service** | `http://localhost:8081` (Spring Boot) |
+| **AI Pricing** | `http://localhost:8000` (FastAPI) |
+| **Database** | `localhost:5432` (PostgreSQL) |
+
+Để dừng toàn bộ hệ thống, bạn chỉ cần gõ:
+```bash
+docker-compose down
+```
 
 ### 2. Manual Development Setup
 
