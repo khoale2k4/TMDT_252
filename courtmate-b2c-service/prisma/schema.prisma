@@ -25,6 +25,8 @@ model Venue {
 
   // THÊM DÒNG NÀY ĐỂ LIÊN KẾT:
   courts          Court[] 
+
+  @@map("Venue")
 }
 
 // THÊM BẢNG COURT
@@ -36,6 +38,8 @@ model Court {
   slots      Slot[]
 
   venue      Venue    @relation(fields: [venue_id], references: [id], onDelete: Cascade)
+
+  @@map("Court")
 }
 
 // THÊM BẢNG SLOT
@@ -57,6 +61,8 @@ model Slot {
 
   court      Court    @relation(fields: [court_id], references: [id], onDelete: Cascade)
   booking      Booking?  @relation(fields: [booking_id], references: [id])
+
+  @@map("Slot")
 }
 
 
@@ -69,4 +75,58 @@ model Booking {
   created_at     DateTime @default(now())
 
   slots          Slot[]
+
+  @@map("Booking")
+}
+model UserActivity {
+  id          String   @id @default(uuid())
+  user_id     String
+  date        String   // YYYY-MM-DD
+  matches     Int      @default(0)
+  check_ins   Int      @default(0)
+
+  @@unique([user_id, date])
+  @@map("user_activities")
+}
+
+model UserStat {
+  user_id         String   @id
+  elo_rating      Int      @default(1200)
+  total_matches   Int      @default(0)
+  level           String   @default("Beginner")
+  milestones      String[] 
+  
+  @@map("user_stats")
+}
+
+model Lobby {
+  id              String   @id @default(uuid())
+  creator_id      String
+  venue_id        String
+  court_id        String
+  slot_id         String
+  sport_type      String
+  required_level  String   @default("Any") // "Beginner", "Intermediate", "Advanced"
+  target_players  Int      @default(4)
+  current_players Int      @default(1)
+  status          String   @default("waiting") // "waiting", "matched", "cancelled"
+  total_price     Int
+  split_price     Int
+  created_at      DateTime @default(now())
+
+  members         LobbyMember[]
+
+  @@map("lobbies")
+}
+
+model LobbyMember {
+  id          String   @id @default(uuid())
+  lobby_id    String
+  user_id     String
+  status      String   @default("joined") // "joined", "paid", "left"
+  joined_at   DateTime @default(now())
+
+  lobby       Lobby    @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
+
+  @@map("lobby_members")
 }
