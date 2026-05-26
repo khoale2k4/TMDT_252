@@ -1,9 +1,13 @@
 import prisma from '../config/prisma';
 
 export interface NearbyVenueParams {
-  lat: number;
-  lng: number;
-  radiusKm: number;
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
+  minLat?: number;
+  maxLat?: number;
+  minLng?: number;
+  maxLng?: number;
   sportTypes?: string[];
   sortBy?: string;
   limit: number;
@@ -11,18 +15,22 @@ export interface NearbyVenueParams {
 }
 
 export const findNearbyVenues = async (params: NearbyVenueParams) => {
-  const { lat, lng, radiusKm, sportTypes, sortBy, limit, offset } = params;
+  const { lat, lng, radiusKm, minLat, maxLat, minLng, maxLng, sportTypes, sortBy, limit, offset } = params;
 
-  // Công thức Haversine tính khoảng cách (km)
-  const distanceCalc = `
-    (6371 * acos(
-      cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng})) + 
-      sin(radians(${lat})) * sin(radians(lat))
-    ))
-  `;
+  let distanceCalc = '0';
+  let whereClause = 'WHERE 1=1';
 
-  // Xây dựng điều kiện lọc động
-  let whereClause = `WHERE ${distanceCalc} <= ${radiusKm}`;
+  if (minLat !== undefined && maxLat !== undefined && minLng !== undefined && maxLng !== undefined) {
+    // Bounding Box Query
+    whereClause += ` AND lat BETWEEN ${minLat} AND ${maxLat} AND lng BETWEEN ${minLng} AND ${maxLng}`;
+    if (lat !== undefined && lng !== undefined) {
+        distanceCalc = `(6371 * acos(cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng})) + sin(radians(${lat})) * sin(radians(lat))))`;
+    }
+  } else if (lat !== undefined && lng !== undefined && radiusKm !== undefined) {
+    // Radius Query
+    distanceCalc = `(6371 * acos(cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng})) + sin(radians(${lat})) * sin(radians(lat))))`;
+    whereClause += ` AND ${distanceCalc} <= ${radiusKm}`;
+  }
   
   if (sportTypes && sportTypes.length > 0) {
     const formattedTypes = sportTypes.map(t => `'${t}'`).join(',');
@@ -41,7 +49,7 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
       sport_types, amenities, cover_image_url,
       min_price, max_price, rating_avg, total_reviews,
       ${distanceCalc} AS distance_km
-    FROM "Venue"
+    FROM venues
     ${whereClause}
     ${orderByClause}
     LIMIT ${limit} OFFSET ${offset}
@@ -50,7 +58,7 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
   // Query Count để làm phân trang
   const countQuery = `
     SELECT COUNT(*)::int as total
-    FROM "Venue"
+    FROM venues
     ${whereClause}
   `;
 

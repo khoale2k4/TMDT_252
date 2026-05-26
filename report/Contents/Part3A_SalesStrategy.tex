@@ -12,7 +12,7 @@ Hệ thống CourtMate áp dụng mô hình doanh thu phức hợp (Hybrid Monet
 \subsection{Lợi thế cạnh tranh độc quyền (Unique Selling Propositions - USP)}
 CourtMate định vị mình là giải pháp dẫn đầu thị trường nhờ vào các lợi thế cạnh tranh mang tính bản địa hóa và công nghệ vượt trội:
 \begin{itemize}
-    \item \textit{Localized Integration:} Tích hợp sâu với các cổng thanh toán MoMo, ZaloPay và đặc biệt là hệ thống hóa đơn điện tử MISA. Đây là rào cản kỹ thuật mà các ứng dụng quốc tế khó vượt qua tại thị trường Việt Nam.
+    \item \textit{Localized Integration:} Tích hợp sâu với các cổng thanh toán VietQR và đặc biệt là hệ thống hóa đơn điện tử MISA. Đây là rào cản kỹ thuật mà các ứng dụng quốc tế khó vượt qua tại thị trường Việt Nam.
     \item \textit{Data-Driven Insights:} Cung cấp cho chủ sân các công cụ phân tích dữ liệu trực quan như Bản đồ nhiệt (Heatmap) về tỷ lệ lấp đầy và báo cáo tài chính thời gian thực.
     \item \textit{Hybrid Sports Support:} Hỗ trợ cấu hình lưới lịch linh hoạt cho các môn thể thao lai như Pickleball, cho phép chia nhỏ hoặc gộp sân một cách nhanh chóng.
 \end{itemize}
@@ -28,9 +28,17 @@ Dưới đây là bảng so sánh CourtMate với các nhóm đối thủ chính
     \textbf{Tiêu chí} & \textbf{CourtMate} & \textbf{Nền tảng Quốc tế \cite{ref:playtomic, ref:courtreserve}} & \textbf{Giải pháp Nội địa \cite{ref:alobo}} & \textbf{Quản lý truyền thống} \\ \hline
     Chi phí sử dụng & Phí SaaS thấp & Phí SaaS cao (199\$-549\$/th) \cite{ref:playtomic, ref:courtreserve} & Phí SaaS trung bình (220k-299k) \cite{ref:alobo} & Miễn phí \\ \hline
     Tự động hóa AI & Cao (Dynamic Pricing) & Trung bình & Không hỗ trợ định giá động & Không hỗ trợ \\ \hline
-    Bản địa hóa & Tối ưu (MISA/MoMo) & Hạn chế \cite{ref:playtomic, ref:courtreserve} & Tốt (Thanh toán VN) & Thủ công \\ \hline
+    Bản địa hóa & Tối ưu (VietQR) & Hạn chế \cite{ref:playtomic, ref:courtreserve} & Tốt (Thanh toán VN) & Thủ công \\ \hline
     Trải nghiệm UX & Mượt mà, đa dịch vụ & Chuyên nghiệp & Phổ thông, tập trung POS & Phụ thuộc nhân sự \\ \hline
     \end{tabularx}
     \caption{Ma trận so sánh năng lực cạnh tranh}
     \label{tab:competitor_matrix}
 \end{table}
+
+\subsection{Cơ sở dữ liệu và Động lực định giá (Pricing Rationale \& Data-Driven)}
+Để đảm bảo tính khả thi tài chính và đáp ứng tiêu chí định giá dựa trên dữ liệu thực tế, mức phí gói SaaS B2B của CourtMate (dao động từ 200.000 VNĐ - 500.000 VNĐ/tháng tùy quy mô cụm sân) được thiết lập dựa trên phân tích khả năng chi trả (Willingness-to-pay) của các doanh nghiệp SME tại Việt Nam:
+
+\begin{itemize}
+    \item \textbf{Benchmark thị trường chéo (Cross-industry Benchmark):} Dựa trên dữ liệu khảo sát biểu phí của các giải pháp quản lý bán lẻ và F\&B phổ biến trên thị trường như KiotViet hay PosApp (hiện đang thu phí dao động từ 220.000 - 299.000 VNĐ/tháng cho gói cơ bản), mức giá đề xuất của CourtMate hoàn toàn nằm trong ngưỡng an toàn, cạnh tranh và dễ dàng gỡ bỏ rào cản chi phí cho các chủ sân.
+    \item \textbf{Chiến lược Thâm nhập thị trường (Market Penetration):} Động lực cốt lõi của chính sách Zero-Commission (0\% hoa hồng) không phải là hi sinh biên lợi nhuận, mà là vũ khí chiến lược để thu hút nhanh chóng nguồn cung. Khi nền tảng đạt được Điểm tới hạn (Critical Mass) về số lượng sân bãi, CourtMate sẽ sở hữu một lượng lớn dữ liệu người chơi (B2C) tự nhiên. Nguồn dữ liệu hành vi này chính là tài nguyên để khai thác luồng doanh thu mở rộng về sau: Quảng cáo nhắm mục tiêu (Ad-supported) cho các thương hiệu dụng cụ thể thao.
+\end{itemize}

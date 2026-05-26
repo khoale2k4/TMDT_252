@@ -1,4 +1,4 @@
-build_pdf:
+build:
 	xelatex -interaction=nonstopmode -halt-on-error main.tex || true
 	xelatex -interaction=nonstopmode -halt-on-error main.tex || true
 

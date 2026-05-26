@@ -15,8 +15,11 @@ import vn.sportscourt.courtmate.b2b.service.PaymentService;
 @RequestMapping("/api/webhooks")
 public class PaymentWebhookController {
 
-    @Value("${payment.momo.secret-key}")
-    private String secretKey;
+    @Value("${payment.momo.secret-key:default_momo_secret}")
+    private String momoSecretKey;
+
+    @Value("${payment.vietqr.secret-key:default_vietqr_secret}")
+    private String vietqrSecretKey;
 
     @Autowired
     private PaymentService paymentService;
@@ -28,8 +31,10 @@ public class PaymentWebhookController {
             @RequestBody String rawBody // Lấy string thô để tính toán chữ ký chính xác nhất
     ) {
         try {
-            // 1. Xác minh HMAC-SHA256
-            if (!verifySignature(rawBody, signature, secretKey)) {
+            // 1. Xác minh HMAC-SHA256 tùy theo provider
+            String activeSecretKey = provider.equalsIgnoreCase("vietqr") ? vietqrSecretKey : momoSecretKey;
+            
+            if (!verifySignature(rawBody, signature, activeSecretKey)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Signature");
             }
             System.out.println(1);

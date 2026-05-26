@@ -14,7 +14,7 @@ import vn.sportscourt.courtmate.b2b.service.PricingRulesService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/admin/pricing-rules")
+@RequestMapping("/admin/pricing-rules")
 @RequiredArgsConstructor
 public class PricingRulesController {
 

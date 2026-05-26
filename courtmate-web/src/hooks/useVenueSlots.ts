@@ -32,8 +32,10 @@ export default function useVenueSlots(selectedVenueId: string | null): UseVenueS
 
     let isCancelled = false;
 
-    const fetchVenueSlots = async () => {
-      setSlotLoading(true);
+    const fetchVenueSlots = async (isBackgroundPolling = false) => {
+      if (!isBackgroundPolling) {
+        setSlotLoading(true);
+      }
       setSlotError(null);
       setSelectedVenueSlots(null);
 
@@ -67,7 +69,7 @@ export default function useVenueSlots(selectedVenueId: string | null): UseVenueS
           setSlotError("Không thể tải lịch sân.");
         }
       } finally {
-        if (!isCancelled) {
+        if (!isCancelled && !isBackgroundPolling) {
           setSlotLoading(false);
         }
       }
@@ -75,8 +77,14 @@ export default function useVenueSlots(selectedVenueId: string | null): UseVenueS
 
     fetchVenueSlots();
 
+    // Short Polling: Tự động refresh mỗi 10s
+    const pollingInterval = setInterval(() => {
+      fetchVenueSlots(true);
+    }, 10000);
+
     return () => {
       isCancelled = true;
+      clearInterval(pollingInterval);
     };
   }, [selectedVenueId]);
 

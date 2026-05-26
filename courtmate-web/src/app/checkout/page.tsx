@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import axiosClient from '@/services/axiosClient';
 import {
   ArrowLeft,
   BadgeCheck,
@@ -13,8 +14,9 @@ import {
   Smartphone,
   Wallet,
 } from 'lucide-react';
-import axiosClient from '@/services/axiosClient';
+import { QRCodeSVG } from 'qrcode.react';
 import Button from '@/components/Button';
+import CountdownTimer from '@/components/CountdownTimer';
 import type { BookingDraft } from '@/types/booking';
 
 type CheckoutStep = 1 | 2 | 3;
@@ -161,6 +163,12 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleTimerExpire = () => {
+    alert('Thời gian giữ chỗ đã hết. Vui lòng đặt lại sân.');
+    sessionStorage.removeItem(STORAGE_KEY);
+    router.push(`/venues/${draft?.venueId || ''}`);
+  };
+
 
   if (isLoading) {
     return (
@@ -203,6 +211,10 @@ export default function CheckoutPage() {
           <ArrowLeft className="h-6 w-6" />
           Back
         </button>
+
+        <div className="mt-4 flex justify-center">
+          <CountdownTimer onExpire={handleTimerExpire} />
+        </div>
 
         <Stepper currentStep={step} />
 
@@ -436,6 +448,31 @@ function ConfirmStep({
           <SummaryRow label="Payment" value={paymentLabel} />
         </div>
       </div>
+
+      {paymentLabel === 'QR' ? (
+        <div className="mt-8 flex w-full max-w-xl flex-col items-center justify-center rounded-[28px] bg-white p-8 text-center shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
+          <h2 className="text-xl font-bold text-slate-900">Quét mã VietQR để thanh toán</h2>
+          <p className="mt-2 text-sm text-slate-500">Mở ứng dụng ngân hàng và quét mã bên dưới</p>
+          <div className="mt-6 overflow-hidden rounded-2xl border-2 border-slate-100 p-6 flex justify-center items-center">
+            <QRCodeSVG
+              value={`vietqr://970436/0987654321?amount=${draft.totalPrice}&addInfo=CM${draft.venueId?.slice(0,6)}`}
+              size={200}
+              level="H"
+              includeMargin={false}
+              imageSettings={{
+                src: "https://vietqr.net/portal/v2/img/vietqr-logo.svg",
+                height: 40,
+                width: 40,
+                excavate: true,
+              }}
+            />
+          </div>
+          <div className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+            <p>Nội dung chuyển khoản:</p>
+            <p className="mt-1 text-lg font-bold text-slate-900 tracking-wider">CM{draft.venueId?.slice(0,6)}</p>
+          </div>
+        </div>
+      ) : null}
 
       <Button
         size="lg"

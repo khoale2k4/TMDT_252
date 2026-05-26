@@ -4,40 +4,56 @@ import prisma from '../config/prisma';
 
 export const getNearby = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { lat, lng, radius_km } = req.query;
+    const { lat, lng, radius_km, min_lat, max_lat, min_lng, max_lng } = req.query;
 
-    // Validate bắt buộc
-    if (!lat || !lng || !radius_km) {
+    const hasRadius = lat && lng && radius_km;
+    const hasBounds = min_lat && max_lat && min_lng && max_lng;
+
+    if (!hasRadius && !hasBounds) {
       return res.status(400).json({
         error: {
           code: "MISSING_PARAMETERS",
-          message: "Vui lòng cung cấp đầy đủ lat, lng và radius_km."
+          message: "Vui lòng cung cấp (lat, lng, radius_km) hoặc (min_lat, max_lat, min_lng, max_lng)."
         }
       });
     }
 
-    const latNum = parseFloat(lat as string);
-    const lngNum = parseFloat(lng as string);
-    const radiusNum = parseFloat(radius_km as string);
+    if (hasBounds) {
+        const minLatNum = parseFloat(min_lat as string);
+        const maxLatNum = parseFloat(max_lat as string);
+        const minLngNum = parseFloat(min_lng as string);
+        const maxLngNum = parseFloat(max_lng as string);
 
-    // Validate tọa độ
-    if (isNaN(latNum) || latNum < -90 || latNum > 90 || isNaN(lngNum) || lngNum < -180 || lngNum > 180) {
-      return res.status(400).json({
-        error: {
-          code: "INVALID_COORDINATES",
-          message: "Tọa độ không hợp lệ. lat phải trong khoảng [-90, 90] và lng trong khoảng [-180, 180]."
+        if (isNaN(minLatNum) || isNaN(maxLatNum) || isNaN(minLngNum) || isNaN(maxLngNum)) {
+            return res.status(400).json({
+                error: {
+                    code: "INVALID_BOUNDS",
+                    message: "Tọa độ bounding box không hợp lệ."
+                }
+            });
         }
-      });
-    }
+    } else {
+        const latNum = parseFloat(lat as string);
+        const lngNum = parseFloat(lng as string);
+        const radiusNum = parseFloat(radius_km as string);
 
-    // Validate giới hạn bán kính tối đa 50km
-    if (isNaN(radiusNum) || radiusNum < 0 || radiusNum > 50) {
-      return res.status(400).json({
-        error: {
-          code: "INVALID_RADIUS",
-          message: "Bán kính (radius_km) phải trong khoảng [0, 50]."
+        if (isNaN(latNum) || latNum < -90 || latNum > 90 || isNaN(lngNum) || lngNum < -180 || lngNum > 180) {
+          return res.status(400).json({
+            error: {
+              code: "INVALID_COORDINATES",
+              message: "Tọa độ không hợp lệ. lat phải trong khoảng [-90, 90] và lng trong khoảng [-180, 180]."
+            }
+          });
         }
-      });
+
+        if (isNaN(radiusNum) || radiusNum < 0 || radiusNum > 50) {
+          return res.status(400).json({
+            error: {
+              code: "INVALID_RADIUS",
+              message: "Bán kính (radius_km) phải trong khoảng [0, 50]."
+            }
+          });
+        }
     }
 
 
