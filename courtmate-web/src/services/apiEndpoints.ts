@@ -5,6 +5,20 @@ export const API_ENDPOINTS = {
     LOGOUT: '/auth/logout',
     ME: '/auth/me',
   },
+  USERS: {
+    STATS: '/users/me/stats',
+    ACTIVITIES: '/users/me/activities',
+  },
+  CHECKOUTS: {
+    CREATE: '/checkouts',
+    RECURRING: '/checkouts/recurring',
+    GET: (id: string) => `/checkouts/${id}`,
+  },
+  LOBBIES: {
+    LIST: '/lobbies',
+    CREATE: '/lobbies',
+    JOIN: (id: string) => `/lobbies/${id}/join`,
+  },
   VENUES: {
     LIST: '/venues',
     NEARBY: '/venues/nearby',

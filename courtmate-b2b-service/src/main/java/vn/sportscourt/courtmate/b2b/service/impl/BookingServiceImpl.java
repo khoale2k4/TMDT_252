@@ -26,6 +26,7 @@ import vn.sportscourt.courtmate.b2b.repository.SlotRepository;
 import vn.sportscourt.courtmate.b2b.repository.VenueRepository;
 import vn.sportscourt.courtmate.b2b.service.AuditLogService;
 import vn.sportscourt.courtmate.b2b.service.BookingService;
+import vn.sportscourt.courtmate.b2b.service.SseService;
 import vn.sportscourt.courtmate.b2b.statemachine.BookingStateMachineService;
 
 import java.time.LocalDate;
@@ -46,6 +47,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
     private final BookingStateMachineService stateMachineService;
     private final AuditLogService auditLogService;
+    private final SseService sseService;
 
     // ── Walk-in ───────────────────────────────────────────────────────────
 
@@ -110,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
         String datePrefix = LocalDate.now().toString().replace("-", "");
         String receiptNo = "RC" + datePrefix + saved.getId().toString().substring(0, 4).toUpperCase();
 
-        return WalkInResponse.builder()
+        WalkInResponse response = WalkInResponse.builder()
                 .bookingId(saved.getId())
                 .status(saved.getStatus().name())
                 .paymentStatus(payment.getStatus().name())
@@ -122,6 +124,10 @@ public class BookingServiceImpl implements BookingService {
                         .build())
                 .receiptNo(receiptNo)
                 .build();
+
+        sseService.sendEventToVenue(venue.getId(), "NEW_BOOKING", response);
+
+        return response;
     }
 
     // ── Read ──────────────────────────────────────────────────────────────
@@ -379,7 +385,7 @@ public class BookingServiceImpl implements BookingService {
             log.info("Đã đưa thông báo hủy lịch của booking {} vào hàng đợi gửi SMS/Email", id);
         }
 
-        return CancelBookingResponse.builder()
+        CancelBookingResponse response = CancelBookingResponse.builder()
                 .bookingId(id)
                 .status("cancelled")
                 .refund(CancelBookingResponse.RefundInfo.builder()
@@ -391,6 +397,12 @@ public class BookingServiceImpl implements BookingService {
                 .customerNotified(request.isNotifyCustomer())
                 .auditLogId(auditId)
                 .build();
+
+        if (booking.getVenue() != null) {
+            sseService.sendEventToVenue(booking.getVenue().getId(), "UPDATE_BOOKING", response);
+        }
+
+        return response;
     }
 
     // ── Check-in ──────────────────────────────────────────────────────────
@@ -419,7 +431,7 @@ public class BookingServiceImpl implements BookingService {
                 ? booking.getItems().get(0) : null;
         Slot slot = firstItem != null ? firstItem.getSlot() : null;
 
-        return CheckInResponse.builder()
+        CheckInResponse response = CheckInResponse.builder()
                 .bookingId(id)
                 .checkinStatus("checked_in")
                 .checkinAt(OffsetDateTime.now())
@@ -431,6 +443,12 @@ public class BookingServiceImpl implements BookingService {
                         .endTime(slot.getEndTime())
                         .build() : null)
                 .build();
+
+        if (booking.getVenue() != null) {
+            sseService.sendEventToVenue(booking.getVenue().getId(), "UPDATE_BOOKING", response);
+        }
+
+        return response;
     }
 
     // ── Private ───────────────────────────────────────────────────────────

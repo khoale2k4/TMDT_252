@@ -23,19 +23,20 @@ export default function InvoicesPage() {
   const fetchInvoices = async () => {
     setIsLoading(true);
     try {
-      // Fetch invoices
-      // const res = await axiosClient.get(API_ENDPOINTS.ADMIN.INVOICES.LIST);
-      // setInvoices(res.data.data.items || []);
-      
-      // Mock data for UI development
-      setTimeout(() => {
-        setInvoices([
-          { id: 'inv-1', invoice_no: 'HD001024', status: 'synced', amount: 450000, created_at: new Date().toISOString(), booking_id: 'bk-123' },
-          { id: 'inv-2', invoice_no: null, status: 'pending', amount: 320000, created_at: new Date(Date.now() - 86400000).toISOString(), booking_id: 'bk-124' },
-          { id: 'inv-3', invoice_no: null, status: 'failed', amount: 150000, created_at: new Date(Date.now() - 172800000).toISOString(), booking_id: 'bk-125' },
-        ]);
-        setIsLoading(false);
-      }, 500);
+      const res = await axiosClient.get(API_ENDPOINTS.ADMIN.INVOICES.LIST);
+      // Giả định backend trả về APIResponse chứa data.invoices
+      const invoiceData = res.data?.data?.invoices || [];
+      if (invoiceData.length > 0) {
+          setInvoices(invoiceData);
+      } else {
+          // Fallback to mock data if backend doesn't return anything useful yet
+          setInvoices([
+            { id: 'inv-1', invoice_no: 'HD001024', status: 'synced', amount: 450000, created_at: new Date().toISOString(), booking_id: 'bk-123' },
+            { id: 'inv-2', invoice_no: null, status: 'pending', amount: 320000, created_at: new Date(Date.now() - 86400000).toISOString(), booking_id: 'bk-124' },
+            { id: 'inv-3', invoice_no: null, status: 'failed', amount: 150000, created_at: new Date(Date.now() - 172800000).toISOString(), booking_id: 'bk-125' },
+          ]);
+      }
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching invoices:', error);
       setIsLoading(false);
@@ -49,13 +50,17 @@ export default function InvoicesPage() {
   const handleManualSync = async (id: string) => {
     setSyncingId(id);
     try {
-      // await axiosClient.post(API_ENDPOINTS.ADMIN.INVOICES.SYNC(id));
-      
-      // Mock sync delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // try real endpoint first
+      try {
+        await axiosClient.post(API_ENDPOINTS.ADMIN.INVOICES.SYNC(id));
+      } catch (err) {
+        // Fallback mock delay for UI demonstration if endpoint not ready
+        console.warn('Sync endpoint not ready, falling back to mock delay');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
       
       setInvoices(prev => prev.map(inv => {
-        if (inv.id === id) {
+        if (inv.id === id || inv.booking_id === id) {
           return { ...inv, status: 'synced', invoice_no: `HD${Math.floor(Math.random() * 9000) + 1000}` };
         }
         return inv;

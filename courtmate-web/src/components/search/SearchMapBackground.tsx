@@ -3,7 +3,15 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { GoogleMap, OverlayView, OverlayViewF } from "@react-google-maps/api";
+import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import type { VenueMarker } from "@/types/map";
+
+export type Bounds = {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+};
 
 type SearchMapBackgroundProps = {
   isMapLoaded: boolean;
@@ -15,6 +23,7 @@ type SearchMapBackgroundProps = {
   selectedMarkerPosition?: google.maps.LatLngLiteral | null;
   bubbleContent?: ReactNode;
   onMarkerSelect?: (venueId: string) => void;
+  onBoundsChange?: (bounds: Bounds) => void;
 };
 
 export default function SearchMapBackground({
@@ -27,10 +36,12 @@ export default function SearchMapBackground({
   selectedMarkerPosition,
   bubbleContent,
   onMarkerSelect,
+  onBoundsChange,
 }: SearchMapBackgroundProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const advancedMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const markerListenersRef = useRef<google.maps.MapsEventListener[]>([]);
+  const clustererRef = useRef<MarkerClusterer | null>(null);
 
   const focusMapOnPosition = (position: google.maps.LatLngLiteral) => {
     if (!mapRef.current) return;
@@ -57,7 +68,6 @@ export default function SearchMapBackground({
 
     advancedMarkersRef.current = venueMarkers.map((markerData) => {
       const marker = new advancedMarkerCtor({
-        map: mapInstance,
         position: markerData.position,
         title: markerData.name,
       });
@@ -71,7 +81,18 @@ export default function SearchMapBackground({
       return marker;
     });
 
+    if (clustererRef.current) {
+        clustererRef.current.clearMarkers();
+    }
+    clustererRef.current = new MarkerClusterer({
+        map: mapInstance,
+        markers: advancedMarkersRef.current,
+    });
+
     return () => {
+      if (clustererRef.current) {
+          clustererRef.current.clearMarkers();
+      }
       markerListenersRef.current.forEach((listener) => listener.remove());
       markerListenersRef.current = [];
 
@@ -103,7 +124,25 @@ export default function SearchMapBackground({
           onLoad={(map) => {
             mapRef.current = map;
           }}
+          onIdle={() => {
+            if (mapRef.current && onBoundsChange) {
+               const bounds = mapRef.current.getBounds();
+               if (bounds) {
+                 const ne = bounds.getNorthEast();
+                 const sw = bounds.getSouthWest();
+                 onBoundsChange({
+                   minLat: sw.lat(),
+                   maxLat: ne.lat(),
+                   minLng: sw.lng(),
+                   maxLng: ne.lng()
+                 });
+               }
+            }
+          }}
           onUnmount={() => {
+            if (clustererRef.current) {
+                clustererRef.current.clearMarkers();
+            }
             markerListenersRef.current.forEach((listener) => listener.remove());
             markerListenersRef.current = [];
 

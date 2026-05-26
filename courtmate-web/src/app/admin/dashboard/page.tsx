@@ -12,7 +12,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   BarChart,
-  Bar
+  Bar,
+  ScatterChart,
+  Scatter,
+  ZAxis,
+  Cell
 } from 'recharts';
 
 export default function DashboardPage() {
@@ -57,6 +61,40 @@ export default function DashboardPage() {
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+
+  const scatterData = heatmapData.flatMap((day, dIdx) => 
+    ['17:00', '18:00', '19:00', '20:00'].map((time, tIdx) => ({
+      day: day.name,
+      time: time,
+      value: day[time],
+      dIdx,
+      tIdx
+    }))
+  );
+
+  const RectangleShape = (props: any) => {
+    const { cx, cy, payload } = props;
+    const value = payload.value;
+    let bgColor = '#f1f5f9';
+    if (value > 90) bgColor = '#2563eb';
+    else if (value > 70) bgColor = '#60a5fa';
+    else if (value > 50) bgColor = '#bfdbfe';
+    
+    const width = 60;
+    const height = 30;
+    
+    return (
+      <rect 
+        x={cx - width / 2} 
+        y={cy - height / 2} 
+        width={width} 
+        height={height} 
+        fill={bgColor} 
+        rx={4} 
+        ry={4} 
+      />
+    );
+  };
 
   if (isLoading) return <div className="p-8">Loading dashboard...</div>;
 
@@ -103,47 +141,43 @@ export default function DashboardPage() {
 
         {/* Custom Heatmap Grid */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Heatmap Mật độ Đặt Sân</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr>
-                  <th className="text-left font-medium text-slate-500 pb-3">Thứ</th>
-                  <th className="font-medium text-slate-500 pb-3 text-center">17:00</th>
-                  <th className="font-medium text-slate-500 pb-3 text-center">18:00</th>
-                  <th className="font-medium text-slate-500 pb-3 text-center">19:00</th>
-                  <th className="font-medium text-slate-500 pb-3 text-center">20:00</th>
-                </tr>
-              </thead>
-              <tbody className="space-y-1">
-                {heatmapData.map((day) => (
-                  <tr key={day.name}>
-                    <td className="font-medium text-slate-700 py-2">{day.name}</td>
-                    {['17:00', '18:00', '19:00', '20:00'].map((time) => {
-                      const value = day[time];
-                      let bgColor = 'bg-slate-100';
-                      if (value > 90) bgColor = 'bg-blue-600';
-                      else if (value > 70) bgColor = 'bg-blue-400';
-                      else if (value > 50) bgColor = 'bg-blue-200';
-                      
-                      return (
-                        <td key={time} className="p-1">
-                          <div className={`h-8 w-full rounded-md ${bgColor} transition-colors hover:ring-2 hover:ring-slate-300`} title={`${value}%`} />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Heatmap Mật độ Đặt Sân (Recharts)</h2>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                <XAxis 
+                  dataKey="time" 
+                  type="category" 
+                  allowDuplicatedCategory={false} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 12, fill: '#64748b' }} 
+                />
+                <YAxis 
+                  dataKey="day" 
+                  type="category" 
+                  allowDuplicatedCategory={false} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 12, fill: '#64748b' }} 
+                />
+                <ZAxis dataKey="value" range={[100, 100]} />
+                <Tooltip 
+                  cursor={{ strokeDasharray: '3 3' }} 
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  formatter={(value: any) => [`${value} lượt khách`, 'Lấp đầy']}
+                />
+                <Scatter data={scatterData} shape={<RectangleShape />} />
+              </ScatterChart>
+            </ResponsiveContainer>
           </div>
           <div className="mt-4 flex items-center justify-end gap-2 text-xs text-slate-500">
             <span>Ít</span>
             <div className="flex gap-1">
-              <div className="w-4 h-4 rounded bg-slate-100"></div>
-              <div className="w-4 h-4 rounded bg-blue-200"></div>
-              <div className="w-4 h-4 rounded bg-blue-400"></div>
-              <div className="w-4 h-4 rounded bg-blue-600"></div>
+              <div className="w-4 h-4 rounded bg-[#f1f5f9]"></div>
+              <div className="w-4 h-4 rounded bg-[#bfdbfe]"></div>
+              <div className="w-4 h-4 rounded bg-[#60a5fa]"></div>
+              <div className="w-4 h-4 rounded bg-[#2563eb]"></div>
             </div>
             <span>Nhiều</span>
           </div>

@@ -37,10 +37,12 @@ CREATE TABLE IF NOT EXISTS venues (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     address TEXT NOT NULL,
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8),
-    amenities JSONB DEFAULT '[]', -- e.g., ["parking", "shower", "wifi"]
-    sport_types JSONB DEFAULT '[]', -- e.g., ["pickleball", "badminton"]
+    lat DECIMAL(10, 8),
+    lng DECIMAL(11, 8),
+    min_price INT DEFAULT 0,
+    max_price INT DEFAULT 0,
+    amenities TEXT[] DEFAULT '{}', -- e.g., '{"parking", "shower", "wifi"}'
+    sport_types TEXT[] DEFAULT '{}', -- e.g., '{"pickleball", "badminton"}'
     status venue_status DEFAULT 'active',
     rating_avg DECIMAL(3, 2) DEFAULT 0.0,
     total_reviews INT DEFAULT 0,
@@ -212,7 +214,7 @@ CREATE INDEX idx_refresh_token_value ON refresh_token(token);
 
 -- Create Indexes
 CREATE INDEX idx_venues_status ON venues(status);
-CREATE INDEX idx_venues_coordinates ON venues(latitude, longitude);
+CREATE INDEX idx_venues_coordinates ON venues(lat, lng);
 CREATE INDEX idx_courts_venue_id ON courts(venue_id);
 CREATE INDEX idx_slots_court_date ON slots(court_id, date);
 CREATE INDEX idx_slots_status ON slots(status);
@@ -228,8 +230,8 @@ INSERT INTO users (id, email, password_hash, full_name, role) VALUES
 ('00000000-0000-0000-0000-000000000002', 'khoa.user@gmail.com', 'hashed_pass', 'Lê Khoa', 'customer');
 
 -- 2. Venue
-INSERT INTO venues (id, owner_id, name, address, latitude, longitude, sport_types, amenities) VALUES 
-('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Sân Pickleball Quận 7 Arena', '123 Nguyễn Thị Thập, Quận 7, TP.HCM', 10.7769, 106.7009, '["pickleball", "badminton"]', '["parking", "shower", "locker"]');
+INSERT INTO venues (id, owner_id, name, address, lat, lng, min_price, max_price, sport_types, amenities) VALUES 
+('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Sân Pickleball Quận 7 Arena', '123 Nguyễn Thị Thập, Quận 7, TP.HCM', 10.7769, 106.7009, 120000, 150000, '{"pickleball", "badminton"}', '{"parking", "shower", "locker"}');
 
 -- 3. Court
 INSERT INTO courts (id, venue_id, name, sport_type) VALUES 

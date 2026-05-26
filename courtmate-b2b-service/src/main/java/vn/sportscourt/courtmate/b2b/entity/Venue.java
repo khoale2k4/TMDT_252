@@ -60,8 +60,8 @@ public class Venue {
     /**
      * JSONB: ["parking","shower","locker","cafe"]
      */
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
+    @Type(io.hypersistence.utils.hibernate.type.array.ListArrayType.class)
+    @Column(columnDefinition = "text[]")
     List<String> amenities;
 
     /**

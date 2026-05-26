@@ -23,9 +23,13 @@ export const getNearbyVenuesService = async (query: any) => {
   const offset = (page - 1) * limit;
 
   const repoParams: venueRepository.NearbyVenueParams = {
-    lat: parseFloat(query.lat as string),
-    lng: parseFloat(query.lng as string),
-    radiusKm: Math.min(parseFloat(query.radius_km as string), 50),
+    lat: query.lat ? parseFloat(query.lat as string) : undefined,
+    lng: query.lng ? parseFloat(query.lng as string) : undefined,
+    radiusKm: query.radius_km ? Math.min(parseFloat(query.radius_km as string), 50) : undefined,
+    minLat: query.min_lat ? parseFloat(query.min_lat as string) : undefined,
+    maxLat: query.max_lat ? parseFloat(query.max_lat as string) : undefined,
+    minLng: query.min_lng ? parseFloat(query.min_lng as string) : undefined,
+    maxLng: query.max_lng ? parseFloat(query.max_lng as string) : undefined,
     sportTypes: query.sport_types ? (query.sport_types as string).split(',') : undefined,
     sortBy: query.sort_by as string,
     limit,

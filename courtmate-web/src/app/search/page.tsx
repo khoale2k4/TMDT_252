@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLoadScript } from "@react-google-maps/api";
 import { ChevronRight } from "lucide-react";
-import SearchMapBackground from "@/components/search/SearchMapBackground";
+import SearchMapBackground, { type Bounds } from "@/components/search/SearchMapBackground";
 import SearchSidebar from "@/components/search/SearchSidebar";
 import VenueMapBubble from "@/components/search/VenueMapBubble";
 import useVenueMarkers from "@/hooks/useVenueMarkers";
@@ -22,6 +22,7 @@ export default function SearchPage() {
   const [openFilterSignal, setOpenFilterSignal] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [mapBounds, setMapBounds] = useState<Bounds | null>(null);
   const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAP_ID || "DEMO_MAP_ID";
   const { isLoaded: isMapLoaded, loadError: mapLoadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
@@ -64,20 +65,21 @@ export default function SearchPage() {
     setSelectedVenueId(venueId);
   }, []);
 
-  const fetchVenues = useCallback(async (filters: SearchFilters = {}) => {
+  const fetchVenues = useCallback(async (filters: SearchFilters = {}, bounds?: Bounds | null) => {
     setLoading(true);
 
-    const baseParams = {
-      lat: filters.lat || searchParams.get("lat") || "10.7769",
-      lng: filters.lng || searchParams.get("lng") || "106.7009",
-      radius_km: filters.radius_km || searchParams.get("radius_km") || "10",
-    };
+    let params: any = { ...filters };
 
-    const hasAdvancedFilters = Object.keys(filters).some(
-      (key) => !["lat", "lng", "radius_km"].includes(key)
-    );
-
-    const params = hasAdvancedFilters ? { ...baseParams, ...filters } : baseParams;
+    if (bounds) {
+       params.min_lat = bounds.minLat;
+       params.max_lat = bounds.maxLat;
+       params.min_lng = bounds.minLng;
+       params.max_lng = bounds.maxLng;
+    } else {
+       params.lat = filters.lat || searchParams.get("lat") || "10.7769";
+       params.lng = filters.lng || searchParams.get("lng") || "106.7009";
+       params.radius_km = filters.radius_km || searchParams.get("radius_km") || "10";
+    }
 
     try {
       const res = await axiosClient.get<NearbyVenueResponse>(API_ENDPOINTS.VENUES.NEARBY, { params });
@@ -96,6 +98,16 @@ export default function SearchPage() {
   useEffect(() => {
     fetchVenues();
   }, [fetchVenues]);
+
+  // Gọi API khi thay đổi Bounds (kéo map)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+        if (mapBounds) {
+            fetchVenues({}, mapBounds);
+        }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [mapBounds, fetchVenues]);
 
   const bubbleContent = useMemo(() => {
     if (!selectedVenueId) {
@@ -155,6 +167,7 @@ export default function SearchPage() {
         selectedMarkerPosition={selectedMarkerPosition}
         bubbleContent={bubbleContent}
         onMarkerSelect={handleVenueSelect}
+        onBoundsChange={(bounds) => setMapBounds(bounds)}
       />
 
       {isSidebarOpen && (

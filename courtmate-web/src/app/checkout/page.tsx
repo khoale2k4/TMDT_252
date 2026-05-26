@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import axiosClient from '@/services/axiosClient';
 import {
   ArrowLeft,
   BadgeCheck,
@@ -13,6 +14,7 @@ import {
   Smartphone,
   Wallet,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import Button from '@/components/Button';
 import CountdownTimer from '@/components/CountdownTimer';
 import type { BookingDraft } from '@/types/booking';
@@ -447,15 +449,22 @@ function ConfirmStep({
         </div>
       </div>
 
-      {draft.paymentMethod === 'qr' || paymentLabel === 'QR' ? (
+      {paymentLabel === 'QR' ? (
         <div className="mt-8 flex w-full max-w-xl flex-col items-center justify-center rounded-[28px] bg-white p-8 text-center shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
           <h2 className="text-xl font-bold text-slate-900">Quét mã VietQR để thanh toán</h2>
           <p className="mt-2 text-sm text-slate-500">Mở ứng dụng ngân hàng và quét mã bên dưới</p>
-          <div className="mt-6 overflow-hidden rounded-2xl border-2 border-slate-100 p-2">
-            <img 
-              src={`https://img.vietqr.io/image/970436-0987654321-print.png?amount=${draft.totalPrice}&addInfo=CM${draft.venueId?.slice(0,6)}&accountName=COURTMATE`}
-              alt="VietQR"
-              className="h-48 w-48 object-contain"
+          <div className="mt-6 overflow-hidden rounded-2xl border-2 border-slate-100 p-6 flex justify-center items-center">
+            <QRCodeSVG
+              value={`vietqr://970436/0987654321?amount=${draft.totalPrice}&addInfo=CM${draft.venueId?.slice(0,6)}`}
+              size={200}
+              level="H"
+              includeMargin={false}
+              imageSettings={{
+                src: "https://vietqr.net/portal/v2/img/vietqr-logo.svg",
+                height: 40,
+                width: 40,
+                excavate: true,
+              }}
             />
           </div>
           <div className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
