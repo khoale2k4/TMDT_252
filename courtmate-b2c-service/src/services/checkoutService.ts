@@ -80,4 +80,85 @@ export class CheckoutService {
       }
     };
   }
+
+  public async processRecurringCheckout(userId: string, body: any) {
+    const { venue_id, court_id, start_date, end_date, days_of_week, start_time, end_time, payment_method } = body;
+    
+    // Convert dates
+    const start = new Date(start_date);
+    const end = new Date(end_date);
+    const requestedDates: string[] = [];
+
+    // Find all matching dates
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      // getDay(): 0 is Sunday, 1 is Monday...
+      if (days_of_week.includes(d.getDay())) {
+        requestedDates.push(d.toISOString().split('T')[0]);
+      }
+    }
+
+    // Check all slots
+    // Using prisma directly here since repository doesn't have bulk fetch for simplicity
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+
+    const existingSlots = await prisma.slot.findMany({
+      where: {
+        court_id,
+        date: { in: requestedDates },
+        start_time,
+        end_time
+      }
+    });
+
+    const bookedSlots = [];
+    const conflictedSlots = [];
+    let totalPrice = 0;
+
+    for (const date of requestedDates) {
+      const slot = existingSlots.find((s: any) => s.date === date);
+      if (slot && slot.status === 'available') {
+        bookedSlots.push(slot);
+        totalPrice += slot.price;
+      } else {
+        conflictedSlots.push(date);
+      }
+    }
+
+    // If no slots available
+    if (bookedSlots.length === 0) {
+       throw { status: 400, error: { message: "No available slots found for the given schedule." } };
+    }
+
+    // Create Booking
+    const booking = await prisma.booking.create({
+      data: {
+        user_id: userId,
+        status: 'pending_payment',
+        payment_method: payment_method || 'momo',
+        total_amount: totalPrice
+      }
+    });
+
+    // Update slots to locked/booked
+    for (const slot of bookedSlots) {
+       await prisma.slot.update({
+         where: { id: slot.id },
+         data: {
+           status: 'locked',
+           locked_by: userId,
+           booking_id: booking.id,
+           locked_until: new Date(Date.now() + 10 * 60000) // 10 mins lock
+         }
+       });
+    }
+
+    return {
+      booking_id: booking.id,
+      total_amount: totalPrice,
+      booked_slots_count: bookedSlots.length,
+      conflicted_dates: conflictedSlots,
+      message: `Successfully reserved ${bookedSlots.length} slots. ${conflictedSlots.length} slots were skipped due to conflicts.`
+    };
+  }
 }
