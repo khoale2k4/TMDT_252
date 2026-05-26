@@ -1,45 +1,196 @@
 \section{Phân tích bối cảnh và Khảo sát thị trường}
 
-\subsection{Phân tích thị trường}
-Thị trường thể thao vãng lai (recreational sports) tại Việt Nam đang trải qua giai đoạn tăng trưởng nóng với tỷ lệ CAGR đạt mức 15.1\% \cite{ref:statista} trong giai đoạn 2023-2025. Đặc biệt, sự bùng nổ của bộ môn Pickleball — một "hybrid sport" kết hợp giữa tennis, cầu lông và bóng bàn — đã tạo ra một làn sóng đầu tư hạ tầng quy mô chưa từng có. 
+\subsection{Giới thiệu đề tài}
+\textbf{CourtMate} là hệ thống quản lý và đặt sân thể thao trực tuyến, hoạt động như một nền tảng trung gian kết nối các chủ sân với người chơi. Dự án tập trung vào việc tối ưu hóa quy trình vận hành và khai thác hiệu quả công suất sân thông qua các giải pháp số hóa hiện đại, hướng tới mục tiêu xây dựng một hệ sinh thái thể thao kết nối toàn diện.
 
-\noindent Dựa trên các dữ liệu khảo sát thực tế (primary research), các cụm sân tại các thành phố lớn như TP. Hồ Chí Minh và Hà Nội thường xuyên đạt tỷ lệ lấp đầy (occupancy rate) trên 95\% \cite{ref:laodong} trong các khung giờ cao điểm (17:00 - 21:00). Tuy nhiên, một nghịch lý tồn tại là tỷ lệ này giảm sâu xuống dưới 30\% trong các khung giờ hành chính (8:00 - 16:00). 
+\subsection{Bối cảnh thị trường và lý do chọn đề tài}
+\subsubsection{Bối cảnh thị trường}
+Thị trường thể thao giải trí tại Việt Nam đang trải qua giai đoạn tăng trưởng nóng với tỷ lệ CAGR dự kiến đạt mức $15.1\%$ trong giai đoạn 2023-2025 [?]. Đặc biệt, sự bùng nổ của bộ môn Pickleball — một loại hình thể thao kết hợp (hybrid sport) — đã kích hoạt làn sóng đầu tư hạ tầng quy mô lớn [?]. Tuy nhiên, thị trường đang đối mặt với sự mất cân bằng cung-cầu: tỷ lệ lấp đầy (occupancy rate) đạt trên $95\%$ vào giờ vàng nhưng lại giảm sâu xuống dưới $30\%$ vào giờ hành chính [?].
 
-\subsection{Bài toán Chi phí cơ hội (Opportunity Cost Analysis)}
-Dưới góc nhìn kinh tế học, việc các slots sân trống trong giờ thấp điểm không đơn thuần là sự thiếu vắng người chơi, mà là một khoản Chi phí cơ hội rất lớn đối với chủ đầu tư. 
+\subsubsection{Lý do chọn đề tài}
+Hiện trạng quản lý thủ công (sổ tay, Excel) khiến các chủ sân không thể điều tiết giá linh hoạt để thu hút khách hàng vào các khung giờ thấp điểm. Đề tài được lựa chọn nhằm giải quyết bài toán \textit{"Tài nguyên tiêu biến theo thời gian"}: mỗi giờ sân trống là một khoản doanh thu biên bị mất đi vĩnh viễn và không thể tích lũy lại [?].
+
+\subsection{Mục đích, mục tiêu và câu hỏi nghiên cứu}
+\subsubsection{Mục đích nghiên cứu}
+Xây dựng nền tảng SaaS giúp các chủ sân tối ưu hóa nguồn lực nhàn rỗi và cung cấp cho người chơi một quy trình đặt sân khép kín, tiện lợi.
+
+\subsubsection{Câu hỏi nghiên cứu}
+Làm thế nào để ứng dụng thuật toán định giá động (Dynamic Pricing) và dữ liệu thời gian thực để lấp đầy các khoảng trống công suất và tối đa hóa lợi nhuận cho chủ sân?
+
+\subsubsection{Mục tiêu tổng quát}
+Số hóa toàn diện quy trình quản lý và giao dịch trong lĩnh vực kinh doanh sân thể thao tại thị trường Việt Nam.
+
+\subsubsection{Mục tiêu cụ thể}
 \begin{itemize}
-    \item \textbf{Khấu hao cố định:} Các chi phí thuê mặt bằng, bảo trì mặt sân và nhân sự tại chỗ là các chi phí cố định (fixed costs) phát sinh bất kể sân có người chơi hay không.
-    \item \textbf{Thất thoát doanh thu biên:} Với mức giá thuê sân dao động từ 150.000 - 250.000 VNĐ/giờ \cite{ref:laodong}, việc trống 5-8 tiếng mỗi ngày trên quy mô cụm 10 sân sẽ gây thất thoát doanh thu tiềm năng lên tới hàng tỷ đồng mỗi năm.
+    \item Hoàn thiện hệ thống đặt sân với độ trễ xử lý giao dịch dưới 10ms [?].
+    \item Tích hợp cơ chế định giá động tự động dựa trên mật độ sử dụng sân [?].
+    \item Đảm bảo tính chính xác 100\% trong việc đồng bộ hóa lịch sân, loại bỏ lỗi đặt trùng (double booking).
 \end{itemize}
-Dự án \textbf{CourtMate} ra đời để giải quyết bài toán tối ưu hóa nguồn lực này thông qua cơ chế định giá động và kết nối cung-cầu thời gian thực.
 
-\subsection{Phân tích SWOT mở rộng}
-\begin{table}[H]
-    \centering
-    \renewcommand{\arraystretch}{1.5}
-    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
-    \hline
-    \textbf{Điểm mạnh (Strengths)} & 
-    \begin{itemize}[leftmargin=*, nosep]
-        \item Chiến lược "Zero-Commission" giúp thâm nhập thị trường (Market Penetration) nhanh chóng bằng cách phá vỡ rào cản chi phí trung gian.
-        \item Hệ thống lõi (Core Engine) hỗ trợ giao dịch thời gian thực với độ trễ cực thấp.
-    \end{itemize} \\ \hline
-    \textbf{Điểm yếu (Weaknesses)} & 
-    \begin{itemize}[leftmargin=*, nosep]
-        \item Phụ thuộc vào thói quen chuyển đổi số (Digital Transformation) của các chủ sân truyền thống.
-        \item Rủi ro về tính sẵn sàng của hệ thống mạng tại các khu vực ngoại thành.
-    \end{itemize} \\ \hline
-    \textbf{Cơ hội (Opportunities)} & 
-    \begin{itemize}[leftmargin=*, nosep]
-        \item Xu hướng thể thao hóa cộng đồng đang được chính phủ và các doanh nghiệp lớn thúc đẩy.
-        \item Khả năng mở rộng quy mô (Scalability) sang các môn thể thao khác như bóng đá Futsal hoặc Golf 3D.
-    \end{itemize} \\ \hline
-    \textbf{Thách thức (Threats)} & 
-    \begin{itemize}[leftmargin=*, nosep]
-        \item Sự cạnh tranh từ các nền tảng cũ (legacy systems) có tệp khách hàng trung thành lớn.
-        \item Biến động chi phí vận hành hạ tầng Cloud và API phí bản đồ.
-    \end{itemize} \\ \hline
-    \end{tabularx}
-    \caption{Phân tích SWOT nâng cao cho hệ thống CourtMate}
-    \label{tab:swot_expanded}
-\end{table}
+\subsection{Cơ sở nghiên cứu và phương pháp thu thập dữ liệu}
+\subsubsection{Nguồn dữ liệu thứ cấp}
+Nhóm sử dụng các báo cáo thị trường từ Statista, Google Cloud và các công bố chính thống về xu hướng tiêu dùng Gen Z tại Việt Nam [?].
+
+\subsubsection{Khảo sát và phỏng vấn sơ cấp}
+Thực hiện khảo sát trực tiếp tại các cụm sân nội đô để thu thập dữ liệu về giá thuê (trung bình 180.000 - 220.000 VNĐ/giờ) và các khó khăn trong việc quản trị thủ công [?].
+
+\subsubsection{Phạm vi mẫu và giới hạn nghiên cứu}
+Nghiên cứu tập trung vào các cụm sân Pickleball và cầu lông tại khu vực đô thị mật độ cao (TP.HCM), nơi có nhu cầu đặt sân trực tuyến lớn nhất.
+
+\subsubsection{Các phát hiện sơ bộ}
+Qua quá trình khảo sát thực tế và phân tích dữ liệu thứ cấp, nhóm rút ra các phát hiện cốt lõi sau:
+\begin{itemize}
+    \item \textbf{Nghịch lý công suất}: Tỷ lệ lấp đầy sân đạt ngưỡng tới hạn ($>95\%$) vào khung giờ vàng nhưng lại lãng phí hơn $70\%$ năng lực vận hành vào giờ hành chính [?].
+    \item \textbf{Sự sẵn sàng về công nghệ}: Hơn $85\%$ người chơi thuộc thế hệ Gen Z ưu tiên các nền tảng cho phép đặt sân và thanh toán tự động mà không cần gọi điện xác nhận [?].
+    \item \textbf{Rào cản tài chính của chủ sân}: Các giải pháp hiện tại thu phí hoa hồng trên mỗi lượt đặt hoặc phí thuê phần mềm quá cao, tạo ra tâm lý e ngại chuyển đổi sang nền tảng số [?].
+\end{itemize}
+
+\subsection{Xác định vấn đề, nỗi đau (Pain points) và cơ hội kinh doanh}
+\subsubsection{Pain points phía khách hàng}
+Người chơi thường gặp khó khăn trong việc tìm kiếm các sân trống và phải thông qua các bước liên hệ thủ công rườm rà, thiếu minh bạch về giá cả [?].
+
+\subsubsection{Pain points phía chủ sân}
+Chủ sân chịu áp lực lớn từ các chi phí cố định (fixed costs) như mặt bằng và nhân sự trong khi không có công cụ để khai thác doanh thu từ các khung giờ thấp điểm [?].
+
+\subsubsection{Các giải pháp hiện có trên thị trường}
+Thị trường hiện nay được chia thành ba nhóm giải pháp chính với các ưu nhược điểm rõ rệt:
+% \begin{table}[htbp]
+%     \begin{tabularx}{\textwidth}{@{}l X X X@{}}
+%         \toprule
+%         \textbf{Tiêu chí} & \textbf{Nền tảng Quốc tế} & \textbf{Giải pháp Nội địa} & \textbf{Quản lý thủ công} \\
+%         \midrule
+%         Chi phí & Rất cao ($199\$ - 549\$/\text{tháng}$) & Trung bình ($220\text{k} - 299\text{k}$) & Miễn phí \\
+%         Công nghệ AI & Trung bình (chưa tối ưu) & Không hỗ trợ & Không hỗ trợ \\
+%         Bản địa hóa & Hạn chế (Thanh toán/Ngôn ngữ) & Tốt (MISA/MoMo) & Không có \\
+%         \bottomrule
+%     \end{tabularx}
+%     \centering
+%     \caption{So sánh các giải pháp quản lý sân hiện có}
+%     \small
+% \end{table}
+
+\subsubsection{Cơ hội kinh doanh của nền tảng trung gian}
+Với chiến lược \textbf{"Zero-Commission"} (0\% phí hoa hồng), CourtMate tạo ra lợi thế cạnh tranh tuyệt đối, giúp phá vỡ rào cản chi phí và thu hút các chủ sân tham gia hệ sinh thái số hóa nhanh chóng.
+
+\subsection{Phạm vi dự án và giả định triển khai}
+\subsubsection{Phạm vi nghiệp vụ}
+Hệ thống tập trung vào quy trình vận hành khép kín: Quản lý danh mục sân $\rightarrow$ Điều tiết lịch thi đấu $\rightarrow$ Đặt chỗ và Thanh toán trực tuyến $\rightarrow$ Báo cáo tài chính và đối soát hóa đơn điện tử.
+
+\subsubsection{Phạm vi thị trường (Launch Scope)}
+Giai đoạn đầu tập trung vào các cụm sân Pickleball và cầu lông tại khu vực TP. Hồ Chí Minh, nơi có mật độ người chơi trẻ và nhu cầu số hóa cao nhất.
+
+\subsubsection{Phạm vi MVP (Minimum Viable Product)}
+Sản phẩm tối thiểu tập trung vào tính năng: Đặt sân thời gian thực, cơ chế khóa suất chơi chống trùng lịch (Lock Slot) và hệ thống quản trị dành cho chủ sân (Admin Dashboard).
+
+
+\section{Phân tích thị trường, khách hàng mục tiêu và cơ sở chiến lược}
+\subsection{Phân tích cơ hội khởi nghiệp từ môi trường}
+\subsubsection{Tác lực kinh tế}
+Môi trường kinh tế hiện tại đang tạo ra "thời điểm vàng" cho các mô hình kinh doanh dựa trên nền tảng số hóa (SaaS) nhờ vào các chỉ số tăng trưởng ấn tượng:
+\begin{itemize}
+    \item \textbf{Tốc độ tăng trưởng ngành:} Ngành thể thao vãng lai tại Việt Nam đang ghi nhận tỷ lệ tăng trưởng kép hàng năm (CAGR) đạt mức $15.1\%$ trong giai đoạn 2023-2025 [?]. Sự gia tăng thu nhập khả dụng dẫn đến mức độ sẵn lòng chi trả cho các dịch vụ sức khỏe và giải trí tăng cao.
+    \item \textbf{Cơn sốt hạ tầng Pickleball:} Chỉ riêng bộ môn Pickleball đã ghi nhận mức tăng trưởng doanh thu thiết bị gần $2.000\%$ trong Quý I/2025  [?]. Điều này kéo theo nhu cầu khổng lồ về hệ thống quản lý suất chơi chuyên nghiệp để đáp ứng làn sóng đầu tư hạ tầng mới [?].
+    \item \textbf{Chi phí cơ hội từ tài nguyên nhàn rỗi:} Dưới góc độ quản trị tài chính, các suất sân trống trong giờ thấp điểm (chiếm hơn $70\%$ tổng công suất) là một loại "tài nguyên tiêu biến" gây thiệt hại doanh thu tiềm năng từ 7.500.000 đến 20.000.000 VNĐ/ngày cho một cụm sân trung bình [?]. Đây chính là dư địa để CourtMate khai thác doanh thu thông qua cơ chế định giá linh hoạt.
+\end{itemize}
+
+\subsubsection{Tác lực xã hội - hành vi}
+Sự thay đổi trong ý thức hệ và thói quen tiêu dùng của khách hàng là động lực chính thúc đẩy sự ra đời của CourtMate:
+\begin{itemize}
+    \item \textbf{Nhận thức về sức khỏe cộng đồng:} Sau đại dịch, cộng đồng ngày càng chú trọng đến việc tập luyện định kỳ, dẫn đến nhu cầu đặt sân cố định và tìm kiếm người chơi ghép (matchmaking) tăng mạnh [?].
+    \item \textbf{Thế hệ người tiêu dùng số (Gen Z):} Nhóm khách hàng từ 14-29 tuổi dự kiến sẽ chiếm $1/3$ tổng lượng khách hàng tại Việt Nam vào năm 2025 [?]. Đặc tính của nhóm này là ưu tiên giao dịch số hóa tự phục vụ (Digital-first self-service) và yêu cầu quy trình đặt chỗ "không chạm", loại bỏ hoàn toàn việc liên lạc thủ công rườm rà  [?].
+    \item \textbf{Xu hướng thể thao hóa cộng đồng:} Các hoạt động thể thao không còn đơn thuần là tập luyện mà đã trở thành phương thức kết nối xã hội, tạo điều kiện cho các tính năng cộng đồng trên ứng dụng phát triển [?].
+\end{itemize}
+
+\subsubsection{Tác lực công nghệ}
+Hạ tầng công nghệ tại Việt Nam đã đạt đến độ chín muồi để triển khai các hệ thống thương mại điện tử phức tạp:
+\begin{itemize}
+    \item \textbf{Sự ổn định của hạ tầng Cloud nội địa:} Việc kết hợp máy chủ trong nước (Bizfly Cloud) giúp hệ thống đạt độ trễ cực thấp (dưới 10ms), đảm bảo trải nghiệm đặt sân diễn ra tức thì [?].
+    \item \textbf{Hệ sinh thái thanh toán số:} Sự phổ biến của các cổng thanh toán (VietQR) và quét mã QR cho phép CourtMate thực hiện luồng giao dịch khép kín từ đặt chỗ đến thanh toán chỉ trong 30 giây [?].
+    \item \textbf{Công nghệ tự động hóa và AI:} Khả năng áp dụng các thuật toán định giá động (AI Dynamic Pricing) giúp tự động hóa việc điều tiết giá theo nhu cầu thị trường, một điều mà quản lý thủ công không bao giờ thực hiện được [?].
+\end{itemize}
+
+\subsubsection{Tác lực pháp lý / chính sách / nền tảng số}
+Các quy định và xu hướng nền tảng đang tạo ra hành lang an toàn nhưng cũng đầy thách thức:
+\begin{itemize}
+    \item \textbf{Chính sách thúc đẩy kinh tế số:} Chính phủ đang khuyến khích mạnh mẽ việc chuyển đổi số và xã hội hóa thể thao, tạo thuận lợi cho các startup công nghệ xâm nhập thị trường [?].
+    \item \textbf{Quy định về hóa đơn điện tử:} Việc bắt buộc tích hợp hóa đơn điện tử (như MISA) giúp CourtMate trở thành công cụ hỗ trợ đắc lực cho chủ sân trong việc minh bạch hóa tài chính và tuân thủ pháp luật [?].
+    \item \textbf{Biến động chính sách của các nền tảng nền tảng:} Những thay đổi về chính sách giá từ các bên thứ ba như Google Maps Platform yêu cầu hệ thống phải có chiến lược thích ứng linh hoạt để tối ưu chi phí vận hành [?].
+\end{itemize}
+
+\subsection{Phân khúc thị trường}
+\subsubsection{Tiêu chí phân khúc}
+\begin{itemize}
+    \item \textbf{Địa lý}: Các thành phố lớn (Hà Nội, TP.HCM) có hạ tầng thể thao hiện đại.
+    \item \textbf{Loại hình sân}: Ưu tiên các môn thể thao có tính cộng đồng cao (Pickleball, Cầu lông, Futsal).
+    \item \textbf{Quy mô}: Cụm sân từ 3 sân đơn lẻ trở lên.
+\end{itemize}
+
+\subsubsection{Các phân khúc tiềm năng}
+\begin{itemize}
+    \item \textbf{Nhóm nhà đầu tư mới}: Cần hệ thống quản lý chuyên nghiệp ngay từ khi khởi công.
+    \item \textbf{Nhóm chủ sân truyền thống}: Đang tìm giải pháp tối ưu hóa doanh thu giờ thấp điểm.
+\end{itemize}
+
+\subsubsection{Lựa chọn thị trường tiền tiêu (Beachhead Market)}
+Thị trường sân Pickleball tại TP.HCM được chọn làm thị trường tiền tiêu do tốc độ tăng trưởng cực nhanh và tệp người dùng sẵn sàng chi trả cho trải nghiệm công nghệ cao .
+
+
+\subsection{Chân dung khách hàng mục tiêu}
+\subsubsection{Chân dung người dùng cuối}
+Thế hệ Gen Z ($14-29$ tuổi), yêu thích thể thao, sử dụng ví điện tử và có thói quen tìm kiếm dịch vụ qua mạng xã hội.
+
+\subsubsection{Chân dung khách hàng điển hình}
+Các cá nhân hoặc đơn vị kinh doanh sở hữu cụm sân lớn, mong muốn giảm bớt sự phụ thuộc vào quản lý nhân sự thủ công và minh bạch hóa dòng tiền .
+
+
+
+\subsection{Quy mô thị trường và tiềm năng thị trường}
+\subsubsection{Giả định cơ sở và nguyên tắc lượng hóa}
+Dựa trên số liệu thị trường thể thao Việt Nam năm 2024, dự báo về số lượng sân bãi sẽ tăng mạnh để đáp ứng phong trào Pickleball [?].
+
+\subsubsection{TAM (Total Addressable Market)}
+Tổng thị trường có thể tiếp cận: Ước tính khoảng $50.000$ sân thể thao trên toàn quốc (bao gồm mọi bộ môn).
+
+\subsubsection{SAM (Serviceable Addressable Market)}
+Thị trường thực tế có thể phục vụ: Khoảng $10.000$ cụm sân hiện đại tại các thành phố lớn đã có kết nối Internet và sẵn sàng số hóa.
+
+\subsubsection{SOM (Serviceable Obtainable Market)}
+Thị trường mục tiêu giai đoạn đầu: Đạt quy mô **80 cụm sân** (tương đương $400-500$ sân đơn lẻ) trong năm đầu tiên vận hành. Với doanh thu mục tiêu khoảng $38.5$ triệu VNĐ/tháng.
+
+
+
+\subsection{Phân tích SWOT}
+Để xác định vị thế cạnh tranh và xây dựng lộ trình phát triển bền vững, hệ thống CourtMate được phân tích qua mô hình SWOT mở rộng. Phân tích này kết hợp giữa năng lực nội tại và các biến số thực tế từ thị trường thể thao số hóa giai đoạn 2025-2027.
+\subsubsection{Ma trận SWOT chi tiết}
+\noindent \textbf{Điểm mạnh (Strengths)}
+\begin{itemize}
+    \item \textbf{Chiến lược thâm nhập thị trường "Zero-Commission"}: cam kết mức phí hoa hồng 0\% trên mỗi lượt đặt sân tạo ra lợi thế cạnh tranh về giá, giúp phá vỡ rào cản gia nhập thị trường so với các đối thủ thu phí hiện nay
+    \item \textbf{Ưu thế về hiệu năng hệ thống}: kiến trúc Microservices cho phép xử lý các giao dịch đặt sân thời gian thực với độ trễ cực thấp (dưới 10ms trên hạ tầng nội địa), đảm bảo trải nghiệm người dùng mượt mà ngay cả trong khung giờ cao điểm.
+\end{itemize}
+
+\noindent \textbf{Điểm yếu (Weaknesses)}
+\begin{itemize}
+    \item \textbf{Rào cản từ tâm lý quản trị truyền thống}: sự phụ thuộc kéo dài vào các công cụ thủ công như sổ tay hay Excel của các chủ sân khiến việc thuyết phục chuyển đổi sang nền tảng số hóa gặp nhiều khó khăn.
+    \item \textbf{Sự không đồng bộ về hạ tầng kết nối}: rủi ro về tính ổn định của mạng lưới tại các khu vực ngoại thành hoặc các cụm sân bãi ngoài trời có thể ảnh hưởng đến tính liên tục của dịch vụ trực tuyến.
+\end{itemize}
+
+\noindent \textbf{Cơ hội (Opportunities)}
+\begin{itemize}
+    \item \textbf{Sự bùng nổ của các thị trường mới}: sự trỗi dậy mạnh mẽ của các bộ môn như Pickleball (tăng trưởng doanh thu thiết bị gần 2.000\% trong quý 1/2025) tạo ra nhu cầu khổng lồ về hệ thống quản lý hạ tầng đặt sân chuyên nghiệp.
+    \item \textbf{Sự chuyển dịch chân dung khách hàng}: nhóm khách hàng Gen Z (14-29 tuổi) dự kiến chiếm 1/3 tổng lượng khách hàng tại Việt Nam vào năm 2025, với đặc tính ưu tiên cho các giao dịch số hóa tự phục vụ và thanh toán không chạm.
+\end{itemize}
+
+\noindent \textbf{Thách thức (Threats)}
+\begin{itemize}
+    \item \textbf{Biến động chi phí vận hành từ bên thứ ba}: những thay đổi trong chính sách định giá của Google Maps Platform có thể trực tiếp làm gia tăng chi phí duy trì tính năng bản đồ và định vị của hệ thống
+    \item \textbf{Áp lực cạnh tranh từ các hệ sinh thái cũ}: các phần mềm POS nội địa đã có tệp khách hàng nhất định và hệ thống tích hợp sâu vào các quy trình khác tại sân, gây khó khăn cho việc mở rộng thị phần.
+\end{itemize}
+
+\subsubsection{Chiến lược ứng dụng (Strategic Implications)}
+Dựa trên ma trận trên, CourtMate tập trung vào các nhóm chiến lược trọng tâm để tối ưu hóa hiệu quả kinh doanh:
+\begin{itemize}
+    \item \textbf{Chiến lược S-O (Tấn công)}: tận dụng hệ thống có hiệu năng cao và độ trễ thấp để chiếm lĩnh thị trường Pickleball đang bùng nổ. Bằng cách cung cấp quy trình đặt sân khép kín và tiện lợi, CourtMate đáp ứng chính xác kỳ vọng của thế hệ khách hàng Gen Z.
+    \item \textbf{Chiến lược W-O (Cải thiện)}: sử dụng lợi thế cạnh tranh Zero-Commission" như một công cụ đòn bẩy để thuyết phục các chủ sân e ngại chi phí chuyển đổi. Việc loại bỏ phí hoa hồng giúp chủ sân dễ dàng từ bỏ thói quen quản lý thủ công để gia nhập hệ sinh thái số hóa.
+    \item \textbf{Chiến lược S-T (Phòng thủ)}: triển khai chiến lược Multi-Cloud (kết hợp sử dụng máy chủ nội địa (Bizfly Cloud) để đạt tốc độ phản hồi nhanh và máy chủ quốc tế (AWS) để đảm bảo an toàn dữ liệu) nhằm tối ưu hóa chi phí hạ tầng và đảm bảo tính sẵn sàng cao, giúp hệ thống thích ứng linh hoạt với sự biến động giá dịch vụ từ các nhà cung cấp trung gian.
+    \item \textbf{Chiến lược W-T (Kiểm soát rủi ro)}: giải quyết rủi ro internet chập chờn (đặc biệt tại các sân vùng ngoại thành), hệ thống cho phép ghi nhận thông tin đặt sân ngay cả khi không có kết nối mạng. Các dữ liệu này sẽ được lưu tạm thời và tự động cập nhật lên hệ thống chung ngay khi có internet trở lại. Cơ chế này giúp lịch sân luôn được cập nhật chính xác từng giây, loại bỏ hoàn toàn tình trạng hai khách hàng đặt trùng một giờ sân do lỗi đường truyền.
+\end{itemize}
