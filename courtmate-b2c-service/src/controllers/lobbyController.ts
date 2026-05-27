@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
 
-const MOCK_USER_ID = "user-123";
-
 // Create a new lobby
 export const createLobby = async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user.id;
     const { venue_id, court_id, slot_id, sport_type, required_level, target_players, total_price } = req.body;
     
     // Calculate split price
@@ -13,7 +12,7 @@ export const createLobby = async (req: Request, res: Response) => {
 
     const lobby = await prisma.lobby.create({
       data: {
-        creator_id: MOCK_USER_ID,
+        creator_id: userId,
         venue_id,
         court_id,
         slot_id,
@@ -27,7 +26,7 @@ export const createLobby = async (req: Request, res: Response) => {
         members: {
           create: [
             {
-              user_id: MOCK_USER_ID,
+              user_id: userId,
               status: 'paid' // Creator usually pays first or commits to pay
             }
           ]
@@ -50,14 +49,6 @@ export const getLobbies = async (req: Request, res: Response) => {
   try {
     const { venue_id, sport_type } = req.query;
     
-    let whereClause: any = {
-      status: 'waiting',
-      current_players: { lt: prisma.lobby.fields.target_players }
-    };
-    
-    if (venue_id) whereClause.venue_id = venue_id as string;
-    if (sport_type) whereClause.sport_type = sport_type as string;
-
     // We will just fetch all waiting lobbies for simplicity, but in real app we filter
     // Prisma lt target_players is not directly possible in where without raw query or separate check.
     // For now we just query status = waiting.
@@ -88,6 +79,7 @@ export const getLobbies = async (req: Request, res: Response) => {
 export const joinLobby = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const userId = (req as any).user.id;
     
     // Hardcoded demo joining logic
     const lobby = await prisma.lobby.findUnique({
@@ -101,7 +93,7 @@ export const joinLobby = async (req: Request, res: Response) => {
     }
 
     // Check if user already joined
-    const alreadyJoined = lobby.members.find(m => m.user_id === MOCK_USER_ID);
+    const alreadyJoined = lobby.members.find(m => m.user_id === userId);
     if (alreadyJoined) {
        return res.status(400).json({ error: 'Already joined this lobby' });
     }
@@ -111,7 +103,7 @@ export const joinLobby = async (req: Request, res: Response) => {
       await tx.lobbyMember.create({
         data: {
           lobby_id: id,
-          user_id: MOCK_USER_ID, // In real life, get from JWT
+          user_id: userId,
           status: 'joined' // need to pay next
         }
       });
