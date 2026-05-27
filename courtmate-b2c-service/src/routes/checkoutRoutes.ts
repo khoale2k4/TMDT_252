@@ -7,5 +7,6 @@ const checkoutController = new CheckoutController();
 
 router.post('/', authMiddleware, checkoutController.createCheckout);
 router.post('/recurring', authMiddleware, checkoutController.createRecurringCheckout);
+router.get('/history', authMiddleware, checkoutController.getHistory);
 
 export default router;

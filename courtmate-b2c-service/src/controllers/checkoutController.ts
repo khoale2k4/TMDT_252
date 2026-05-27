@@ -37,4 +37,16 @@ export class CheckoutController {
       }
     }
   };
+
+  public getHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = (req as any).user?.id || "user-123";
+      
+      const data = await this.checkoutService.getBookingHistory(userId);
+
+      res.status(200).json({ data });
+    } catch (error: any) {
+      next(error);
+    }
+  };
 }
