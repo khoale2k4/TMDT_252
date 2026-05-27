@@ -18,6 +18,8 @@ import {
   ZAxis,
   Cell
 } from 'recharts';
+import Link from 'next/link';
+import { Settings, Plus, MapPin, Calendar, Users, TrendingUp } from 'lucide-react';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -27,17 +29,18 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Fetch KPI stats (Mocked or real)
-        // const statsRes = await axiosClient.get(API_ENDPOINTS.ADMIN.DASHBOARD);
-        // setStats(statsRes.data.data);
-        
-        // Mock stats since we might not have the API fully wired
-        setStats({
-          totalRevenue: 24500000,
-          totalBookings: 142,
-          activeUsers: 89,
-          growth: '+12.5%'
-        });
+        const statsRes = await axiosClient.get(API_ENDPOINTS.ADMIN.DASHBOARD);
+        if (statsRes.data && statsRes.data.data) {
+          setStats(statsRes.data.data);
+        } else {
+          setStats({
+            totalRevenue: 0,
+            totalBookings: 0,
+            activeUsers: 0,
+            growth: '0%',
+            totalVenues: 0
+          });
+        }
 
         // Mock heatmap data (Day of Week vs Time Slot)
         const mockHeatmap = [
@@ -99,8 +102,22 @@ export default function DashboardPage() {
   if (isLoading) return <div className="p-8">Loading dashboard...</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Admin Dashboard</h1>
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Dashboard Chủ Sân</h1>
+          <p className="text-slate-500 mt-1">Tổng quan hoạt động kinh doanh của bạn</p>
+        </div>
+        <div className="flex gap-3">
+          <Link href="/admin/venues" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            Quản lý Sân & Lịch
+          </Link>
+          <button className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition">
+            <Settings className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
