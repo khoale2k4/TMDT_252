@@ -1,4 +1,5 @@
 import { getSportTypeColorClass, getSportTypeLabel, type Venue } from "@/types/search";
+import { useRouter } from "next/navigation";
 
 type SearchVenueResultsProps = {
   venues: Venue[];
@@ -7,6 +8,7 @@ type SearchVenueResultsProps = {
 };
 
 export default function SearchVenueResults({ venues, isLoading, onVenueSelect }: SearchVenueResultsProps) {
+  const router = useRouter();
   const formatCurrency = (value?: number) => {
     if (typeof value !== "number") return "-";
 
@@ -57,7 +59,7 @@ export default function SearchVenueResults({ venues, isLoading, onVenueSelect }:
         {venues.map((venue) => (
           <article
             key={venue.venue_id}
-            onClick={() => onVenueSelect(venue.venue_id)}
+            onClick={() => router.push(`/venues/${venue.venue_id}`)}
             className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500"
           >
             <div className="flex gap-4">

@@ -15,7 +15,7 @@ import type { NearbyVenueResponse, SearchFilters, Venue } from "@/types/search";
 
 const mapLibraries: ("places" | "marker")[] = ["places", "marker"];
 
-export default function SearchPage() {
+function SearchPageContent() {
   const searchParams = useSearchParams();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
@@ -200,5 +200,15 @@ export default function SearchPage() {
         </button>
       )}
     </div>
+  );
+}
+
+import { Suspense } from 'react';
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchPageContent />
+    </Suspense>
   );
 }

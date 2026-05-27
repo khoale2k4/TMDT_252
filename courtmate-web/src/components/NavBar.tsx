@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MapPin, Info, User, ShieldCheck } from "lucide-react";
-import type { ReactNode } from "react";
+import { MapPin, Info, User, ShieldCheck, LogOut, FileText } from "lucide-react";
+import { ReactNode, useState, useEffect, useRef } from "react";
 import Button from "./Button";
 
 type NavItem = {
@@ -39,7 +39,30 @@ const inactiveNavLinkClasses =
 
 export default function NavBar() {
   const pathname = usePathname();
-  if (pathname === '/login' || pathname === '/register') return null; 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) setIsLoggedIn(true);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
+
+  if (pathname === '/login' || pathname === '/register' || pathname.startsWith('/admin')) return null; 
   const isActive = (path: string) => pathname === path;
 
   return (
@@ -81,22 +104,68 @@ export default function NavBar() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <Link href="/login">
-              <Button
-                title="Đăng nhập"
-                variant="secondary"
-                className="gap-1 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm"
-              >
-                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span className="hidden sm:inline">Đăng nhập</span>
+            {!isLoggedIn ? (
+              <Link href="/login">
+                <Button
+                  title="Đăng nhập"
+                  variant="secondary"
+                  className="gap-1 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm"
+                >
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                  <span className="hidden sm:inline">Đăng nhập</span>
+                </Button>
+              </Link>
+            ) : (
+              <div className="relative" ref={dropdownRef}>
+                <Button
+                  title="Tài khoản"
+                  variant="secondary"
+                  className="gap-1 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                >
+                  <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                    U
+                  </div>
+                  <span className="hidden sm:inline">Tài khoản</span>
+                </Button>
+
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-1 overflow-hidden z-50">
+                    <Link 
+                      href="/history" 
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <FileText className="w-4 h-4" />
+                      Lịch sử đặt sân
+                    </Link>
+                    <Link 
+                      href="/profile" 
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <User className="w-4 h-4" />
+                      Hồ sơ cá nhân
+                    </Link>
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+
+            <Link href="/admin/dashboard">
+              <Button variant="primary" className="hidden sm:flex px-4 py-2 text-sm">
+                <ShieldCheck className="w-4 h-4 shrink-0" />
+                <span>Admin</span>
               </Button>
             </Link>
-
-
-            <Button variant="primary" className="hidden sm:flex px-4 py-2 text-sm">
-              <ShieldCheck className="w-4 h-4 shrink-0" />
-              <span>Admin</span>
-            </Button>
           </div>
         </div>
       </nav>

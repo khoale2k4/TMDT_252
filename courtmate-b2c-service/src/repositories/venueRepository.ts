@@ -49,7 +49,7 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
       sport_types, amenities, cover_image_url,
       min_price, max_price, rating_avg, total_reviews,
       ${distanceCalc} AS distance_km
-    FROM venues
+    FROM "Venue"
     ${whereClause}
     ${orderByClause}
     LIMIT ${limit} OFFSET ${offset}
@@ -58,7 +58,7 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
   // Query Count để làm phân trang
   const countQuery = `
     SELECT COUNT(*)::int as total
-    FROM venues
+    FROM "Venue"
     ${whereClause}
   `;
 
