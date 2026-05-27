@@ -1,4 +1,5 @@
 import { CheckoutRepository } from '../repositories/checkoutRepository';
+import prisma from '../config/prisma';
 
 export class CheckoutService {
   private checkoutRepo = new CheckoutRepository();
@@ -98,10 +99,7 @@ export class CheckoutService {
     }
 
     // Check all slots
-    // Using prisma directly here since repository doesn't have bulk fetch for simplicity
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
-
+    // Using global prisma instance
     const existingSlots = await prisma.slot.findMany({
       where: {
         court_id,
@@ -160,5 +158,25 @@ export class CheckoutService {
       conflicted_dates: conflictedSlots,
       message: `Successfully reserved ${bookedSlots.length} slots. ${conflictedSlots.length} slots were skipped due to conflicts.`
     };
+  }
+
+  public async getBookingHistory(userId: string) {
+    const bookings = await prisma.booking.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: 'desc' },
+      include: {
+        slots: {
+          include: {
+            court: {
+              include: {
+                venue: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return bookings;
   }
 }
