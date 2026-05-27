@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { createLobby, getLobbies, joinLobby } from '../controllers/lobbyController';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
 router.get('/', getLobbies);
-router.post('/', createLobby);
-router.post('/:id/join', joinLobby);
+router.post('/', authMiddleware, createLobby);
+router.post('/:id/join', authMiddleware, joinLobby);
 
 export default router;
