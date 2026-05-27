@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, Loader2, User, Trophy, Phone } from 'lucide-react';
+import { toast } from 'react-toastify';
+import axiosClient from '@/services/axiosClient';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -26,12 +28,26 @@ export default function AuthPage() {
 
     console.log("Dữ liệu gửi lên API:", payload);
 
-    // Giả lập gọi API Backend (Vì backend chưa viết Route này)
-    setTimeout(() => {
-      localStorage.setItem('token', 'dev-token-123');
-      router.push('/');
+    try {
+      let res;
+      if (isLogin) {
+        res = await axiosClient.post('/auth/login', payload);
+      } else {
+        res = await axiosClient.post('/auth/register', payload);
+      }
+
+      if (res.data?.data?.token) {
+        localStorage.setItem('token', res.data.data.token);
+        toast.success(isLogin ? 'Đăng nhập thành công!' : 'Đăng ký thành công!');
+        router.push('/');
+      }
+    } catch (error: any) {
+      console.error(error);
+      const msg = error.response?.data?.error?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại!';
+      toast.error(msg);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
