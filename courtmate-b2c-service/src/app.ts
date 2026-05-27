@@ -1,5 +1,5 @@
 console.log("=== ĐÃ VÀO APP.TS ===");
-import express from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { errorHandler } from './middlewares/errorHandler';
@@ -7,7 +7,7 @@ import routes from './routes';
 
 dotenv.config();
 
-const app = express();
+const app: Application = express();
 
 // Middlewares
 app.use(cors());
