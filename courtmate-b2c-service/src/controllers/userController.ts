@@ -1,19 +1,17 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
 
-// Mock user ID for B2C Demo
-const MOCK_USER_ID = "user-123";
-
 export const getProfileStats = async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user.id;
     let stat = await prisma.userStat.findUnique({
-      where: { user_id: MOCK_USER_ID }
+      where: { user_id: userId }
     });
 
     if (!stat) {
       stat = await prisma.userStat.create({
         data: {
-          user_id: MOCK_USER_ID,
+          user_id: userId,
           elo_rating: 1450,
           total_matches: 42,
           level: "Intermediate",
@@ -46,8 +44,9 @@ export const getProfileStats = async (req: Request, res: Response) => {
 
 export const getActivityTracker = async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user.id;
     let activities = await prisma.userActivity.findMany({
-      where: { user_id: MOCK_USER_ID },
+      where: { user_id: userId },
       orderBy: { date: 'asc' }
     });
 
@@ -61,7 +60,7 @@ export const getActivityTracker = async (req: Request, res: Response) => {
         // Randomly assign matches
         if (Math.random() > 0.6) {
           mockActivities.push({
-            user_id: MOCK_USER_ID,
+            user_id: userId,
             date: d.toISOString().split('T')[0],
             matches: Math.floor(Math.random() * 3) + 1,
             check_ins: 1
@@ -74,7 +73,7 @@ export const getActivityTracker = async (req: Request, res: Response) => {
       });
 
       activities = await prisma.userActivity.findMany({
-        where: { user_id: MOCK_USER_ID },
+        where: { user_id: userId },
         orderBy: { date: 'asc' }
       });
     }
