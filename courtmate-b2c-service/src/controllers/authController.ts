@@ -28,8 +28,19 @@ export class AuthController {
         return;
       }
 
+      let venueId: string | undefined = undefined;
+      if (userRecord.role === 'owner' || userRecord.role === 'admin') {
+        const venue = await prisma.venue.findFirst({
+          where: { owner_id: userRecord.id }
+        });
+        if (venue) venueId = venue.id;
+      }
+
+      const payload: any = { sub: userRecord.email, id: userRecord.id, email: userRecord.email, role: userRecord.role };
+      if (venueId) payload.venue_id = venueId;
+
       const token = jwt.sign(
-        { id: userRecord.id, email: userRecord.email, role: userRecord.role },
+        payload,
         process.env.JWT_SECRET || 'your_secret_key',
         { expiresIn: '7d' }
       );
@@ -37,7 +48,13 @@ export class AuthController {
       res.status(200).json({
         data: {
           token,
-          user: { id: userRecord.id, email: userRecord.email, name: userRecord.full_name, role: userRecord.role }
+          user: { 
+            id: userRecord.id, 
+            email: userRecord.email, 
+            name: userRecord.full_name, 
+            role: userRecord.role,
+            ...(venueId && { venue_id: venueId })
+          }
         }
       });
     } catch (error) {
@@ -48,7 +65,7 @@ export class AuthController {
 
   public register = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { email, password, full_name, phone } = req.body;
+      const { email, password, full_name, phone, role } = req.body;
 
       if (!email || !password || !full_name) {
         res.status(400).json({ error: { code: 'MISSING_FIELDS', message: 'Vui lòng điền đầy đủ thông tin' } });
@@ -67,12 +84,24 @@ export class AuthController {
           email,
           password: hashedPassword,
           full_name,
-          phone: phone || null
+          phone: phone || null,
+          role: role === 'admin' ? 'admin' : 'user'
         }
       });
 
+      let venueId: string | undefined = undefined;
+      if (newUser.role === 'owner' || newUser.role === 'admin') {
+        const venue = await prisma.venue.findFirst({
+          where: { owner_id: newUser.id }
+        });
+        if (venue) venueId = venue.id;
+      }
+
+      const payload: any = { sub: newUser.email, id: newUser.id, email: newUser.email, role: newUser.role };
+      if (venueId) payload.venue_id = venueId;
+
       const token = jwt.sign(
-        { id: newUser.id, email: newUser.email, role: newUser.role },
+        payload,
         process.env.JWT_SECRET || 'your_secret_key',
         { expiresIn: '7d' }
       );
@@ -80,7 +109,13 @@ export class AuthController {
       res.status(201).json({
         data: {
           token,
-          user: { id: newUser.id, email: newUser.email, name: newUser.full_name, role: newUser.role }
+          user: { 
+            id: newUser.id, 
+            email: newUser.email, 
+            name: newUser.full_name, 
+            role: newUser.role,
+            ...(venueId && { venue_id: venueId })
+          }
         }
       });
     } catch (error) {

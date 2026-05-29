@@ -15,6 +15,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +25,7 @@ export default function AuthPage() {
     // Payload chuẩn bị gửi lên API Backend
     const payload = isLogin 
       ? { email, password } 
-      : { email, password, full_name: fullName, phone };
+      : { email, password, full_name: fullName, phone, role: isAdmin ? 'owner' : 'user' };
 
     console.log("Dữ liệu gửi lên API:", payload);
 
@@ -38,8 +39,25 @@ export default function AuthPage() {
 
       if (res.data?.data?.token) {
         localStorage.setItem('token', res.data.data.token);
+        
+        const role = res.data.data.user?.role;
+        const venueId = res.data.data.user?.venue_id;
+
+        if (role) {
+          localStorage.setItem('user_role', role);
+        }
+        
+        if (venueId) {
+          localStorage.setItem('active_venue_id', venueId);
+        }
+
         toast.success(isLogin ? 'Đăng nhập thành công!' : 'Đăng ký thành công!');
-        router.push('/');
+        
+        if (role === 'owner' || role === 'admin') {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/');
+        }
       }
     } catch (error: any) {
       console.error(error);
@@ -144,6 +162,19 @@ export default function AuthPage() {
                       placeholder="0901234567"
                     />
                   </div>
+                </div>
+
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="checkbox"
+                    id="admin-toggle"
+                    checked={isAdmin}
+                    onChange={(e) => setIsAdmin(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-[#2a7a62] focus:ring-[#2a7a62] accent-[#2a7a62]"
+                  />
+                  <label htmlFor="admin-toggle" className="text-[13px] text-slate-700 font-medium cursor-pointer">
+                    Đăng ký làm Admin (Chủ sân)
+                  </label>
                 </div>
               </>
             )}
