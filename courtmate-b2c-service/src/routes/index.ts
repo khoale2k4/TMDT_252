@@ -6,6 +6,7 @@ import userRoutes from './userRoutes';
 import lobbyRoutes from './lobbyRoutes';
 import authRoutes from './authRoutes';
 import adminRoutes from './adminRoutes';
+import reviewRoutes from './reviewRoutes';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/users', userRoutes);
 router.use('/lobbies', lobbyRoutes);
 router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
+router.use('/reviews', reviewRoutes);
 
 export default router;

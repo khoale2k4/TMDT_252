@@ -49,6 +49,7 @@ model Court {
   venue_id   String
   name       String
   sport_type String
+  image_url  String?
   slots      Slot[]
 
   venue      Venue    @relation(fields: [venue_id], references: [id], onDelete: Cascade)
@@ -89,9 +90,25 @@ model Booking {
   created_at     DateTime @default(now())
 
   slots          Slot[]
+  review         Review?
 
   @@map("Booking")
 }
+
+model Review {
+  id          String   @id @default(uuid())
+  booking_id  String   @unique
+  user_id     String
+  venue_id    String
+  rating      Int
+  comment     String?
+  created_at  DateTime @default(now())
+
+  booking     Booking  @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+
+  @@map("Review")
+}
+
 model UserActivity {
   id          String   @id @default(uuid())
   user_id     String
