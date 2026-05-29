@@ -8,8 +8,7 @@ export class CheckoutRepository {
     });
   }
 
-  // Sử dụng Transaction: Vừa tạo Booking, vừa Update trạng thái Slot cùng 1 lúc
-  public async createBookingTransaction(userId: string, slotId: string, paymentMethod: string, totalAmount: number) {
+  public async createBookingTransaction(userId: string, slotIds: string[], paymentMethod: string, totalAmount: number) {
     return prisma.$transaction(async (tx) => {
       // 1. Tạo Booking mới
       const booking = await tx.booking.create({
@@ -22,8 +21,8 @@ export class CheckoutRepository {
       });
 
       // 2. Cập nhật Slot
-      await tx.slot.update({
-        where: { id: slotId },
+      await tx.slot.updateMany({
+        where: { id: { in: slotIds } },
         data: {
           status: 'booked',
           booking_id: booking.id,

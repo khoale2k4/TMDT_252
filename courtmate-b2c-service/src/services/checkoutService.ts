@@ -6,31 +6,36 @@ export class CheckoutService {
 
   public async processCheckout(userId: string, body: any) {
     const { booking_items, add_ons = [], delivery, payment_method, coupon_code } = body;
-    const item = booking_items[0];
-
+    
     // 1. Lấy dữ liệu từ DB qua Repository
-    const slot = await this.checkoutRepo.getSlotById(item.slot_id);
+    const slotIds = booking_items.map((item: any) => item.slot_id);
+    const slots = await prisma.slot.findMany({
+      where: { id: { in: slotIds } }
+    });
 
-    if (!slot) {
-      throw { status: 404, error: { code: "NOT_FOUND", message: "Không tìm thấy Slot." } };
+    if (!slots || slots.length !== slotIds.length) {
+      throw { status: 404, error: { code: "NOT_FOUND", message: "Không tìm thấy một số Slot." } };
     }
 
     // 2. Validate thời gian và token giữ chỗ
     const now = new Date();
-    if (
-      slot.status !== 'locked' || 
-      slot.locked_by !== userId || 
-      slot.lock_token !== item.lock_token || 
-      (slot.locked_until && slot.locked_until < now)
-    ) {
-      throw {
-        status: 400,
-        error: { code: "LOCK_EXPIRED", message: `Thời gian giữ chỗ đã hết cho slot ${item.slot_id}. Vui lòng chọn lại.` }
-      };
+    for (const slot of slots) {
+      const item = booking_items.find((i: any) => i.slot_id === slot.id);
+      if (
+        slot.status !== 'locked' || 
+        slot.locked_by !== userId || 
+        slot.lock_token !== item?.lock_token || 
+        (slot.locked_until && slot.locked_until < now)
+      ) {
+        throw {
+          status: 400,
+          error: { code: "LOCK_EXPIRED", message: `Thời gian giữ chỗ đã hết cho một số slot. Vui lòng chọn lại.` }
+        };
+      }
     }
 
     // 3. Tính toán tiền bạc (Mock dữ liệu)
-    const slotPrice = slot.price;
+    const slotPrice = slots.reduce((sum, slot) => sum + slot.price, 0);
     
     let addOnsTotal = 0;
     add_ons.forEach((addon: any) => {
@@ -46,7 +51,7 @@ export class CheckoutService {
     // 4. Lưu vào Database thông qua Repository
     const booking = await this.checkoutRepo.createBookingTransaction(
       userId, 
-      slot.id, 
+      slotIds, 
       payment_method, 
       total
     );
@@ -57,11 +62,11 @@ export class CheckoutService {
       status: booking.status,
       expires_at: new Date(now.getTime() + 15 * 60000).toISOString(),
       line_items: {
-        booking_fees: [{
+        booking_fees: slots.map(slot => ({
           slot_id: slot.id,
           description: `Sân · ${slot.start_time}-${slot.end_time} · ${slot.date}`,
-          price: slotPrice
-        }],
+          price: slot.price
+        })),
         add_ons: add_ons.map((a: any) => ({
           product_id: a.product_id,
           name: "Sản phẩm đính kèm",
@@ -173,7 +178,8 @@ export class CheckoutService {
               }
             }
           }
-        }
+        },
+        review: true
       }
     });
 
