@@ -216,6 +216,7 @@ const VenueDetailPage = () => {
             <div className="relative h-72 w-full md:h-[420px]">
               <img
                 src={venue.cover_image_url || 'https://placehold.co/1200x700/e2e8f0/334155?text=CourtMate'}
+                onError={e => e.currentTarget.src = "https://placehold.co/1200x700/e2e8f0/334155?text=CourtMate"}
                 alt={venue.name}
                 className="h-full w-full object-cover"
               />

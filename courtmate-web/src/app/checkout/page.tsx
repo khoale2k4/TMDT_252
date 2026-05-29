@@ -153,11 +153,11 @@ export default function CheckoutPage() {
       await axiosClient.post('/checkouts', payload);
       
       sessionStorage.removeItem(STORAGE_KEY);
-      router.push(`/venues/${draft?.venueId || ''}`);
-    } catch (error) {
+      router.push(`/history`);
+    } catch (error: any) {
       console.error('Lỗi thanh toán:', error);
-      sessionStorage.removeItem(STORAGE_KEY);
-      router.push(`/venues/${draft?.venueId || ''}`);
+      const errorMessage = error.response?.data?.error?.message || 'Có lỗi xảy ra khi thanh toán. Vui lòng đăng nhập hoặc thử lại!';
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -289,6 +289,7 @@ function ReviewStep({
       <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-start">
         <img
           src={draft.venueImage}
+          onError={e => e.currentTarget.src = "https://placehold.co/600x400/e2e8f0/334155?text=CourtMate"}
           alt={draft.venueName}
           className="h-28 w-full rounded-3xl object-cover shadow-sm sm:w-44"
         />
