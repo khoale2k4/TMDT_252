@@ -32,6 +32,9 @@ export default function DashboardPage() {
         const statsRes = await axiosClient.get(API_ENDPOINTS.ADMIN.DASHBOARD);
         if (statsRes.data && statsRes.data.data) {
           setStats(statsRes.data.data);
+          if (statsRes.data.data.heatmapData) {
+            setHeatmapData(statsRes.data.data.heatmapData);
+          }
         } else {
           setStats({
             totalRevenue: 0,
@@ -40,19 +43,8 @@ export default function DashboardPage() {
             growth: '0%',
             totalVenues: 0
           });
+          setHeatmapData([]);
         }
-
-        // Mock heatmap data (Day of Week vs Time Slot)
-        const mockHeatmap = [
-          { name: 'Mon', '17:00': 80, '18:00': 100, '19:00': 90, '20:00': 60 },
-          { name: 'Tue', '17:00': 70, '18:00': 95, '19:00': 85, '20:00': 50 },
-          { name: 'Wed', '17:00': 60, '18:00': 85, '19:00': 80, '20:00': 55 },
-          { name: 'Thu', '17:00': 75, '18:00': 100, '19:00': 95, '20:00': 65 },
-          { name: 'Fri', '17:00': 85, '18:00': 100, '19:00': 100, '20:00': 80 },
-          { name: 'Sat', '17:00': 90, '18:00': 100, '19:00': 100, '20:00': 90 },
-          { name: 'Sun', '17:00': 85, '18:00': 95, '19:00': 90, '20:00': 75 },
-        ];
-        setHeatmapData(mockHeatmap);
       } catch (error) {
         console.error('Error fetching dashboard:', error);
       } finally {
@@ -79,9 +71,9 @@ export default function DashboardPage() {
     const { cx, cy, payload } = props;
     const value = payload.value;
     let bgColor = '#f1f5f9';
-    if (value > 90) bgColor = '#2563eb';
-    else if (value > 70) bgColor = '#60a5fa';
-    else if (value > 50) bgColor = '#bfdbfe';
+    if (value >= 5) bgColor = '#2563eb';
+    else if (value >= 3) bgColor = '#60a5fa';
+    else if (value >= 1) bgColor = '#bfdbfe';
     
     const width = 60;
     const height = 30;
