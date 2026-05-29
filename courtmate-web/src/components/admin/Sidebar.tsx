@@ -16,6 +16,8 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user_role");
+    localStorage.removeItem("active_venue_id");
     window.location.href = "/";
   };
 

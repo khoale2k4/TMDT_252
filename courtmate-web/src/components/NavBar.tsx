@@ -40,13 +40,23 @@ const inactiveNavLinkClasses =
 export default function NavBar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) setIsLoggedIn(true);
+    const role = localStorage.getItem("user_role");
+    if (token) {
+      setIsLoggedIn(true);
+      setUserRole(role || null);
+    } else {
+      setIsLoggedIn(false);
+      setUserRole(null);
+    }
+  }, [pathname]);
 
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false);
@@ -58,7 +68,10 @@ export default function NavBar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user_role");
+    localStorage.removeItem("active_venue_id");
     setIsLoggedIn(false);
+    setUserRole(null);
     window.location.href = "/";
   };
 
@@ -160,12 +173,14 @@ export default function NavBar() {
             )}
 
 
-            <Link href="/admin/dashboard">
-              <Button variant="primary" className="hidden sm:flex px-4 py-2 text-sm">
-                <ShieldCheck className="w-4 h-4 shrink-0" />
-                <span>Admin</span>
-              </Button>
-            </Link>
+            {(userRole === 'owner' || userRole === 'admin') && (
+              <Link href="/admin/dashboard">
+                <Button variant="primary" className="hidden sm:flex px-4 py-2 text-sm">
+                  <ShieldCheck className="w-4 h-4 shrink-0" />
+                  <span>Admin</span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
