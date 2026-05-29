@@ -67,6 +67,9 @@ export default function SearchVenueResults({ venues, isLoading, onVenueSelect }:
                 <img
                   src={venue.cover_image_url || "https://placehold.co/640x360/e2e8f0/334155?text=Venue"}
                   alt={venue.name}
+                  onError={(e) => {
+                    e.currentTarget.src = "https://placehold.co/640x360/e2e8f0/334155?text=Venue";
+                  }}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute left-1.5 top-1.5">

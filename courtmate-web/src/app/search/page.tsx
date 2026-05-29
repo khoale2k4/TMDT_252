@@ -48,10 +48,7 @@ function SearchPageContent() {
     };
   }, [searchParams]);
 
-  const mapCenter = useMemo(
-    () => venueMarkers[0]?.position || fallbackCenter,
-    [fallbackCenter, venueMarkers]
-  );
+  const mapCenter = fallbackCenter;
 
   const selectedMarkerPosition = useMemo(() => {
     if (!selectedVenueId) {

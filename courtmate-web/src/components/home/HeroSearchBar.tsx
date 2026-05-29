@@ -142,7 +142,19 @@ export default function SearchBar({
             variant="ghost"
             size="sm"
             className="w-fit rounded-full px-2 py-1 font-semibold"
-            onClick={getCurrentLocation}
+            onClick={() => {
+              getCurrentLocation((coords, locationName) => {
+                const query = new URLSearchParams({
+                  lat: coords.lat.toString(),
+                  lng: coords.lng.toString(),
+                  loc: locationName,
+                  sport_types: sport,
+                  date: date,
+                  time_from: time
+                });
+                router.push(`/search?${query.toString()}`);
+              });
+            }}
             disabled={isLoadingAddress}
           >
             <Navigation size={11} strokeWidth={2.5} className={isLoadingAddress ? "animate-pulse" : ""} />

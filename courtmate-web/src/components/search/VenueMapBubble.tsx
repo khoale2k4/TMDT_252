@@ -48,23 +48,31 @@ export default function VenueMapBubble({ data, onClose }: VenueMapBubbleProps) {
             <div className="grid grid-cols-2 gap-2">
               {court.slots.map((slot) => {
                 const isAvailable = slot.status === "available";
+                const isLocked = slot.status === "locked";
+                
+                let containerClass = "cursor-not-allowed border-gray-200 bg-gray-50 opacity-70";
+                let textClass = "text-gray-500 line-through";
+                let statusLabel = <span className="mt-1 text-[10px] font-medium text-red-500">Đã đặt</span>;
+
+                if (isAvailable) {
+                  containerClass = "cursor-pointer border-green-200 bg-green-50 hover:bg-green-100 hover:shadow-sm";
+                  textClass = "text-green-800";
+                  statusLabel = <span className="mt-1 font-semibold text-gray-700">{formatPrice(slot.price)}</span>;
+                } else if (isLocked) {
+                  containerClass = "cursor-wait border-orange-200 bg-orange-50";
+                  textClass = "text-orange-700";
+                  statusLabel = <span className="mt-1 text-[10px] font-medium text-orange-500">Đang giữ chỗ</span>;
+                }
+
                 return (
                   <div
                     key={slot.slot_id}
-                    className={`flex flex-col items-center justify-center rounded-lg border p-2 text-xs transition-all ${isAvailable
-                      ? "cursor-pointer border-green-200 bg-green-50 hover:bg-green-100 hover:shadow-sm"
-                      : "cursor-not-allowed border-gray-200 bg-gray-50 opacity-70"
-                      }`}
+                    className={`flex flex-col items-center justify-center rounded-lg border p-2 text-xs transition-all ${containerClass}`}
                   >
-                    <span className={`font-medium ${isAvailable ? "text-green-800" : "text-gray-500 line-through"}`}>
+                    <span className={`font-medium ${textClass}`}>
                       {slot.start_time} - {slot.end_time}
                     </span>
-
-                    {isAvailable ? (
-                      <span className="mt-1 font-semibold text-gray-700">{formatPrice(slot.price)}</span>
-                    ) : (
-                      <span className="mt-1 text-[10px] font-medium text-red-500">Đã đặt</span>
-                    )}
+                    {statusLabel}
                   </div>
                 );
               })}

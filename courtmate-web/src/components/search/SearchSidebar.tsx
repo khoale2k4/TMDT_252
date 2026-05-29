@@ -180,7 +180,16 @@ export default function SearchSidebar({
         <div className="mt-2 flex items-center gap-2">
           <button
             type="button"
-            onClick={getCurrentLocation}
+            onClick={() => {
+              getCurrentLocation((coords, locationName) => {
+                onApplyFilters({
+                  ...getBaseSearchParams(),
+                  lat: coords.lat.toString(),
+                  lng: coords.lng.toString(),
+                  loc: locationName
+                });
+              });
+            }}
             disabled={isLoadingAddress || !isLoaded}
             className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:text-slate-200"
           >

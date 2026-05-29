@@ -120,7 +120,7 @@ export default function useGoogleLocationSearch({
     }
   };
 
-  const getCurrentLocation = () => {
+  const getCurrentLocation = (onSuccess?: (coords: Coordinates, locationName: string) => void) => {
     if (!navigator.geolocation) {
       toast.error("Trình duyệt của bạn không hỗ trợ định vị.");
       return;
@@ -133,7 +133,9 @@ export default function useGoogleLocationSearch({
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        setCoordinates({ lat: latitude, lng: longitude });
+        const newCoords = { lat: latitude, lng: longitude };
+        setCoordinates(newCoords);
+        let finalLocationName = `${latitude}, ${longitude}`;
 
         try {
           const geocoder = new window.google.maps.Geocoder();
@@ -142,15 +144,16 @@ export default function useGoogleLocationSearch({
           });
 
           if (response.results[0]) {
-            setLocation(response.results[0].formatted_address);
-          } else {
-            setLocation(`${latitude}, ${longitude}`);
+            finalLocationName = response.results[0].formatted_address;
           }
         } catch (error) {
           console.error("Lỗi Geocoding:", error);
-          setLocation(`${latitude}, ${longitude}`);
         } finally {
+          setLocation(finalLocationName);
           setIsLoadingAddress(false);
+          if (onSuccess) {
+            onSuccess(newCoords, finalLocationName);
+          }
         }
       },
       (error) => {
