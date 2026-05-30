@@ -31,9 +31,6 @@ export default function InvoicesPage() {
       } else {
           // Fallback to mock data if backend doesn't return anything useful yet
           setInvoices([
-            { id: 'inv-1', invoice_no: 'HD001024', status: 'synced', amount: 450000, created_at: new Date().toISOString(), booking_id: 'bk-123' },
-            { id: 'inv-2', invoice_no: null, status: 'pending', amount: 320000, created_at: new Date(Date.now() - 86400000).toISOString(), booking_id: 'bk-124' },
-            { id: 'inv-3', invoice_no: null, status: 'failed', amount: 150000, created_at: new Date(Date.now() - 172800000).toISOString(), booking_id: 'bk-125' },
           ]);
       }
       setIsLoading(false);

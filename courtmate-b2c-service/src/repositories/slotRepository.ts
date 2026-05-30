@@ -7,18 +7,20 @@ export class SlotRepository {
     });
   }
 
-  async lockSlot(slotId: string, userId: string, expectedVersion: number, lockedUntil: Date) {
+  async lockSlot(slotId: string, userId: string, expectedVersion: number, lockedUntil: Date, lockToken: string) {
     return prisma.slot.updateMany({
       where: {
         id: slotId,
         version: expectedVersion, 
         status: 'available'       
       },
-    data: {
+      data: {
         status: 'locked',
         locked_by: userId,       
         locked_until: lockedUntil, 
-    }
+        lock_token: lockToken,
+        version: expectedVersion + 1,
+      }
     });
   }
 }

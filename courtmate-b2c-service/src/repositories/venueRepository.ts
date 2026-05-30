@@ -18,14 +18,14 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
   const { lat, lng, radiusKm, minLat, maxLat, minLng, maxLng, sportTypes, sortBy, limit, offset } = params;
 
   let distanceCalc = '0';
-  let whereClause = 'WHERE 1=1';
+  let whereClause = 'WHERE EXISTS (SELECT 1 FROM "Court" WHERE "Court".venue_id = "Venue".id)';
 
   if (minLat !== undefined && maxLat !== undefined && minLng !== undefined && maxLng !== undefined) {
     // Bounding Box Query
     whereClause += ` AND lat BETWEEN ${minLat} AND ${maxLat} AND lng BETWEEN ${minLng} AND ${maxLng}`;
-    if (lat !== undefined && lng !== undefined) {
-        distanceCalc = `(6371 * acos(cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng})) + sin(radians(${lat})) * sin(radians(lat))))`;
-    }
+    const refLat = lat !== undefined ? lat : (minLat + maxLat) / 2;
+    const refLng = lng !== undefined ? lng : (minLng + maxLng) / 2;
+    distanceCalc = `(6371 * acos(cos(radians(${refLat})) * cos(radians(lat)) * cos(radians(lng) - radians(${refLng})) + sin(radians(${refLat})) * sin(radians(lat))))`;
   } else if (lat !== undefined && lng !== undefined && radiusKm !== undefined) {
     // Radius Query
     distanceCalc = `(6371 * acos(cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng})) + sin(radians(${lat})) * sin(radians(lat))))`;

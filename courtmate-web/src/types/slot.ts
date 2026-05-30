@@ -10,6 +10,7 @@ export interface Venue {
   rating: { average: number; total_reviews: number };
   cover_image_url: string;
   is_open_now: boolean;
+  description?: string;
 }
 
 export type Slot = {

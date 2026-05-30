@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
 
         Map<String, Object> extraClaims = new HashMap<>();
         System.out.println(user.getRole());
-        extraClaims.put("role", user.getRole().name());// Ví dụ thêm role của user
+        extraClaims.put("role", user.getRole());// Ví dụ thêm role của user
         extraClaims.put("user_id", userId);
         extraClaims.put("name",user.getFullName());
         Optional<Users> users = userRepository.findById(userId);
@@ -121,7 +121,7 @@ public class AuthServiceImpl implements AuthService {
                     //String accessToken = jwtService.generateToken(user);
                     Map<String, Object> extraClaims = new HashMap<>();
                     System.out.println(user.getRole());
-                    extraClaims.put("role", user.getRole().name());// Ví dụ thêm role của user
+                    extraClaims.put("role", user.getRole());// Ví dụ thêm role của user
                     extraClaims.put("user_id", user.getId());
                     extraClaims.put("name",user.getFullName());
                     //Optional<Users> users = userRepository.findById(userId);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axiosClient from '@/services/axiosClient';
@@ -31,28 +31,28 @@ const paymentOptions: {
   description: string;
 }[] = [
   {
+    id: 'qr',
+    label: 'QR Code',
+    icon: QrCode,
+    description: 'Thanh toán bằng QR Code VietQR',
+  },
+  {
     id: 'credit-card',
     label: 'Credit Card',
     icon: CreditCard,
-    description: 'Thanh toan bang the quoc te hoac the noi dia.',
+    description: 'Thanh toán bằng thẻ quốc tế hoặc thẻ nội địa.',
   },
   {
     id: 'momo',
     label: 'Momo',
     icon: Smartphone,
-    description: 'Thanh toan nhanh qua vi Momo.',
+    description: 'Thanh toán nhanh qua ví Momo.',
   },
   {
     id: 'sepay',
     label: 'Sepay',
     icon: Wallet,
-    description: 'Quet ma hoac chuyen khoan voi Sepay.',
-  },
-  {
-    id: 'qr',
-    label: 'QR',
-    icon: QrCode,
-    description: 'Quet QR thanh toan tu ung dung ngan hang.',
+    description: 'Quét mã hoặc chuyển khoản với Sepay.',
   },
 ];
 
@@ -70,7 +70,7 @@ const formatDate = (value: string) => {
     return value;
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('vi-VN', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -85,9 +85,23 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<CheckoutStep>(1);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit-card');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [userId, setUserId] = useState<string>('');
 
   useEffect(() => {
     const rawDraft = sessionStorage.getItem(STORAGE_KEY);
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.id) {
+          setUserId(payload.id);
+        }
+      } catch (e) {
+        console.error('Error parsing token:', e);
+      }
+    }
 
     if (!rawDraft) {
       setDraft(null);
@@ -137,12 +151,13 @@ export default function CheckoutPage() {
   };
 
   const handleFinish = async () => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       const payload = {
         booking_items: draft?.slotIds.map((id) => ({
           slot_id: id,
-          lock_token: 'mock_lk_token' 
+          lock_token: (draft as any).lockTokens?.[id] || 'mock_lk_token' 
         })),
         add_ons: [],
         delivery: { required: false },
@@ -153,7 +168,7 @@ export default function CheckoutPage() {
       await axiosClient.post('/checkouts', payload);
       
       sessionStorage.removeItem(STORAGE_KEY);
-      router.push(`/history`);
+      setIsSuccess(true);
     } catch (error: any) {
       console.error('Lỗi thanh toán:', error);
       const errorMessage = error.response?.data?.error?.message || 'Có lỗi xảy ra khi thanh toán. Vui lòng đăng nhập hoặc thử lại!';
@@ -164,6 +179,7 @@ export default function CheckoutPage() {
   };
 
   const handleTimerExpire = () => {
+    if (isSuccess) return;
     alert('Thời gian giữ chỗ đã hết. Vui lòng đặt lại sân.');
     sessionStorage.removeItem(STORAGE_KEY);
     router.push(`/venues/${draft?.venueId || ''}`);
@@ -175,7 +191,62 @@ export default function CheckoutPage() {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <div className="text-center">
           <Loader className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
-          <p className="text-sm font-medium text-slate-600">Dang tai phien thanh toan...</p>
+          <p className="text-sm font-medium text-slate-600">Đang tải phiên thanh toán...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isSuccess) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f0fdf4_0%,#f8fafc_22%,#ffffff_100%)] px-4 pt-28 pb-16">
+        <div className="w-full max-w-xl rounded-[32px] bg-white p-8 text-center shadow-[0_18px_45px_rgba(15,23,42,0.08)] ring-1 ring-emerald-100 animate-in fade-in zoom-in-95 duration-300">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 shadow-[0_12px_30px_rgba(16,185,129,0.2)]">
+            <BadgeCheck className="h-12 w-12 animate-bounce" />
+          </div>
+          <h1 className="mt-6 text-3xl font-extrabold text-slate-900">Thanh toán thành công!</h1>
+          <p className="mt-3 text-base leading-6 text-slate-500">
+            Sân của bạn đã được đặt và thanh toán hoàn tất thành công.
+          </p>
+          <div className="mt-8 rounded-2xl bg-slate-50 p-6 text-left ring-1 ring-slate-100">
+            <h3 className="font-semibold text-slate-900">Chi tiết đặt sân</h3>
+            <div className="mt-4 space-y-3 text-sm text-slate-600">
+              <div className="flex justify-between">
+                <span>Sân chơi:</span>
+                <span className="font-semibold text-slate-900">{draft?.venueName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Địa chỉ:</span>
+                <span className="font-medium text-slate-900 text-right max-w-xs">{draft?.venueAddress}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Ngày chơi:</span>
+                <span className="font-semibold text-slate-900">{draft ? formatDate(draft.bookingDate) : ''}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Giờ chơi:</span>
+                <span className="font-medium text-slate-950 bg-blue-50 px-2 py-0.5 rounded-md">{draft?.slotTimes.join(', ')}</span>
+              </div>
+              <div className="flex justify-between border-t border-slate-200 pt-3">
+                <span className="text-base font-medium text-slate-900">Tổng cộng:</span>
+                <span className="text-base font-bold text-blue-600">{draft ? formatCurrency(draft.totalPrice) : ''}</span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <Link
+              href="/history"
+              className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3.5 text-base font-semibold text-white shadow-md hover:bg-blue-700 transition"
+            >
+              Lịch sử đặt sân
+            </Link>
+            <Link
+              href="/search"
+              className="inline-flex items-center justify-center rounded-2xl bg-slate-100 px-5 py-3.5 text-base font-semibold text-slate-700 shadow-sm hover:bg-slate-200 transition"
+            >
+              Đặt thêm sân mới
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -185,15 +256,15 @@ export default function CheckoutPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 pt-28">
         <div className="w-full max-w-xl rounded-[32px] bg-white p-8 text-center shadow-[0_18px_45px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
-          <h1 className="text-2xl font-bold text-slate-900">Chua co thong tin dat san</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Chưa có thông tin đặt sân</h1>
           <p className="mt-3 text-sm leading-6 text-slate-500">
-            Ban hay quay lai trang chi tiet san, chon ngay va gio choi truoc khi thanh toan.
+            Bạn hãy quay lại trang chi tiết sân, chọn ngày và giờ chơi trước khi thanh toán.
           </p>
           <Link
             href="/search"
-            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
           >
-            Tim san ngay
+            Tìm sân ngay
           </Link>
         </div>
       </div>
@@ -209,7 +280,7 @@ export default function CheckoutPage() {
           className="inline-flex items-center gap-3 rounded-full px-3 py-2 text-xl font-medium text-slate-900 transition hover:bg-white/80"
         >
           <ArrowLeft className="h-6 w-6" />
-          Back
+          Quay lại
         </button>
 
         <div className="mt-4 flex justify-center">
@@ -234,6 +305,7 @@ export default function CheckoutPage() {
               draft={draft}
               paymentLabel={paymentLabel}
               onConfirm={handleFinish}
+              userId={userId}
             />
           )}
         </div>
@@ -244,9 +316,9 @@ export default function CheckoutPage() {
 
 function Stepper({ currentStep }: { currentStep: CheckoutStep }) {
   const steps = [
-    { id: 1, label: 'Review' },
-    { id: 2, label: 'Payment' },
-    { id: 3, label: 'Confirm' },
+    { id: 1, label: 'Xem lại' },
+    { id: 2, label: 'Thanh toán' },
+    { id: 3, label: 'Xác nhận' },
   ] as const;
 
   return (
@@ -284,7 +356,7 @@ function ReviewStep({
 }) {
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <h1 className="text-3xl font-semibold text-slate-900">Review Your Booking</h1>
+      <h1 className="text-3xl font-semibold text-slate-900">Xem lại thông tin đặt lịch</h1>
 
       <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-start">
         <img
@@ -300,23 +372,23 @@ function ReviewStep({
             {draft.sportType}
           </div>
           <p className="mt-3 text-sm text-slate-500">{draft.venueAddress}</p>
-          <p className="mt-2 text-sm font-medium text-slate-600">Court: {draft.courtName}</p>
+          <p className="mt-2 text-sm font-medium text-slate-600">Sân: {draft.courtName}</p>
         </div>
       </div>
 
       <div className="my-8 border-t border-slate-200" />
 
       <div className="grid gap-6 text-sm text-slate-600">
-        <SummaryRow label="Date" value={formatDate(draft.bookingDate)} />
-        <SummaryRow label="Time Slots" value={draft.slotTimes.join(', ')} />
-        <SummaryRow label="Duration" value={`${draft.durationHours} hour(s)`} />
-        <SummaryRow label="Total" value={formatCurrency(draft.totalPrice)} isStrong />
+        <SummaryRow label="Ngày chơi" value={formatDate(draft.bookingDate)} />
+        <SummaryRow label="Khung giờ" value={draft.slotTimes.join(', ')} />
+        <SummaryRow label="Thời lượng" value={`${draft.durationHours} giờ`} />
+        <SummaryRow label="Tổng cộng" value={formatCurrency(draft.totalPrice)} isStrong />
       </div>
 
       <div className="mt-10 rounded-[28px] bg-slate-50 px-6 py-5">
-        <h3 className="text-lg font-medium text-slate-900">Cancellation Policy</h3>
+        <h3 className="text-lg font-medium text-slate-900">Chính sách hủy sân</h3>
         <p className="mt-3 text-sm leading-6 text-slate-500">
-          Free cancellation up to 24 hours before your booking. Cancellations made within 24 hours will be charged 50% of the booking fee.
+          Miễn phí hủy sân trước 24 giờ kể từ giờ chơi. Hủy sân trong vòng 24 giờ sẽ tính phí 50% tổng tiền đặt sân.
         </p>
       </div>
 
@@ -327,14 +399,14 @@ function ReviewStep({
           className="h-14 rounded-2xl text-base font-semibold"
           onClick={onBack}
         >
-          Back
+          Quay lại
         </Button>
         <Button
           size="lg"
           className="h-14 rounded-2xl text-base font-semibold shadow-lg shadow-blue-200"
           onClick={onNext}
         >
-          Next
+          Tiếp theo
         </Button>
       </div>
     </div>
@@ -356,7 +428,7 @@ function PaymentStep({
 }) {
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <h1 className="text-3xl font-semibold text-slate-900">Payment Method</h1>
+      <h1 className="text-3xl font-semibold text-slate-900">Phương thức thanh toán</h1>
 
       <div className="mt-10 space-y-5">
         {paymentOptions.map((option) => {
@@ -405,7 +477,7 @@ function PaymentStep({
           className="h-14 rounded-2xl text-base font-semibold"
           onClick={onBack}
         >
-          Back
+          Quay lại
         </Button>
         <Button
           size="lg"
@@ -413,7 +485,7 @@ function PaymentStep({
           onClick={onNext}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Processing...' : 'Next'}
+          {isSubmitting ? 'Đang xử lý...' : 'Tiếp theo'}
         </Button>
       </div>
     </div>
@@ -424,23 +496,32 @@ function ConfirmStep({
   draft,
   paymentLabel,
   onConfirm,
+  userId,
 }: {
   draft: BookingDraft;
   paymentLabel: string;
   onConfirm: () => void;
+  userId?: string;
 }) {
   const [countdown, setCountdown] = useState(10);
   const [isPaid, setIsPaid] = useState(false);
+  const hasTriggered = useRef(false);
+
+  const memo = `CM${draft.venueId?.slice(0, 6)}${userId ? `-${userId.slice(0, 4)}` : ''}`.toUpperCase();
 
   useEffect(() => {
     if (paymentLabel !== 'QR') return;
+    if (hasTriggered.current) return;
 
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setIsPaid(true);
-          onConfirm();
+          if (!hasTriggered.current) {
+            hasTriggered.current = true;
+            setIsPaid(true);
+            onConfirm();
+          }
           return 0;
         }
         return prev - 1;
@@ -456,18 +537,18 @@ function ConfirmStep({
         <BadgeCheck className="h-10 w-10" />
       </div>
 
-      <h1 className="mt-8 text-4xl font-bold text-slate-900">Booking Confirmed</h1>
+      <h1 className="mt-8 text-4xl font-bold text-slate-900">Đặt sân thành công</h1>
       <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
-        Free cancellation up to 24 hours before your booking. Cancellations made within 24 hours will be charged 50% of the booking fee.
+        Miễn phí hủy sân trước 24 giờ kể từ giờ chơi. Hủy sân trong vòng 24 giờ sẽ tính phí 50% tổng tiền đặt sân.
       </p>
 
       <div className="mt-8 w-full max-w-xl rounded-[28px] bg-white p-6 text-left shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
         <div className="space-y-4 text-sm text-slate-600">
-          <SummaryRow label="Date" value={formatDate(draft.bookingDate)} />
-          <SummaryRow label="Time Slots" value={draft.slotTimes.join(', ')} />
-          <SummaryRow label="Duration" value={`${draft.durationHours} hour(s)`} />
-          <SummaryRow label="Court" value={draft.venueName} />
-          <SummaryRow label="Payment" value={paymentLabel} />
+          <SummaryRow label="Ngày đặt" value={formatDate(draft.bookingDate)} />
+          <SummaryRow label="Khung giờ" value={draft.slotTimes.join(', ')} />
+          <SummaryRow label="Thời lượng" value={`${draft.durationHours} giờ`} />
+          <SummaryRow label="Cụm sân" value={draft.venueName} />
+          <SummaryRow label="Phương thức" value={paymentLabel === 'QR' ? 'Chuyển khoản QR' : paymentLabel} />
         </div>
       </div>
 
@@ -477,14 +558,14 @@ function ConfirmStep({
           <p className="mt-2 text-sm text-slate-500">Mở ứng dụng ngân hàng và quét mã bên dưới</p>
           <div className="mt-6 overflow-hidden rounded-2xl border-2 border-slate-100 p-4 flex justify-center items-center bg-white max-w-[340px]">
             <img
-              src={`https://img.vietqr.io/image/MB-0987654321-compact.png?amount=${draft.totalPrice}&addInfo=CM${draft.venueId?.slice(0, 6)}&accountName=COURTMATE`}
+              src={`https://img.vietqr.io/image/MB-0987654321-compact.png?amount=${draft.totalPrice}&addInfo=${memo}&accountName=COURTMATE`}
               alt="Mã VietQR Thanh Toán"
               className="w-full h-auto max-h-[320px] object-contain rounded-xl"
             />
           </div>
           <div className="mt-6 w-full rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
             <p>Nội dung chuyển khoản:</p>
-            <p className="mt-1 text-lg font-bold text-slate-900 tracking-wider">CM{draft.venueId?.slice(0, 6)}</p>
+            <p className="mt-1 text-lg font-bold text-slate-900 tracking-wider">{memo}</p>
           </div>
           
           <div className="mt-6 flex flex-col items-center gap-2">
@@ -509,7 +590,7 @@ function ConfirmStep({
         onClick={onConfirm}
         disabled={paymentLabel === 'QR' && isPaid}
       >
-        {paymentLabel === 'QR' && isPaid ? 'Đang xử lý...' : 'Confirm'}
+        {paymentLabel === 'QR' && isPaid ? 'Đang xử lý...' : 'Xác nhận'}
       </Button>
     </div>
   );

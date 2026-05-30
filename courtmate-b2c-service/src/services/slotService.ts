@@ -30,7 +30,7 @@ export class SlotService {
     lockedUntil.setMinutes(lockedUntil.getMinutes() + lockDurationMinutes);
     const lockToken = `lk_${crypto.randomBytes(5).toString('hex')}`;
 
-    const updateResult = await this.slotRepository.lockSlot(slotId, userId, expectedVersion, lockedUntil);
+    const updateResult = await this.slotRepository.lockSlot(slotId, userId, expectedVersion, lockedUntil, lockToken);
 
     if (updateResult.count === 0) {
       const currentSlot = await this.slotRepository.findById(slotId);

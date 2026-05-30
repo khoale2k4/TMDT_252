@@ -1,4 +1,4 @@
-﻿export type Venue = {
+export type Venue = {
   venue_id: string;
   name: string;
   address: string;
@@ -13,6 +13,7 @@
   cover_image_url?: string;
   is_open_now?: boolean;
   next_available_slot?: string;
+  reviews?: any[];
 };
 
 export type SearchFilters = {

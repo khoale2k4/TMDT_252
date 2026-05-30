@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, CalendarDays, Sparkles, Receipt, LogOut } from 'lucide-react';
 
 const sidebarItems = [
-  { href: '/admin/dashboard', title: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-  { href: '/admin/venues', title: 'Slot Grid', icon: <CalendarDays className="w-5 h-5" /> },
-  { href: '/admin/pricing-rules', title: 'AI Pricing', icon: <Sparkles className="w-5 h-5" /> },
-  { href: '/admin/invoices', title: 'Invoices', icon: <Receipt className="w-5 h-5" /> },
+  { href: '/admin/dashboard', title: 'Trang chủ', icon: <LayoutDashboard className="w-5 h-5" /> },
+  { href: '/admin/venues', title: 'Hệ thống Sân', icon: <CalendarDays className="w-5 h-5" /> },
+  { href: '/admin/pricing-rules', title: 'Định giá động', icon: <Sparkles className="w-5 h-5" /> },
+  { href: '/admin/invoices', title: 'Hoá đơn', icon: <Receipt className="w-5 h-5" /> },
 ];
 
 export default function Sidebar() {

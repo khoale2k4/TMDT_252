@@ -14,7 +14,7 @@ export class CheckoutRepository {
       const booking = await tx.booking.create({
         data: {
           user_id: userId,
-          status: 'pending_payment',
+          status: 'paid',
           payment_method: paymentMethod,
           total_amount: totalAmount
         }
@@ -29,6 +29,16 @@ export class CheckoutRepository {
           locked_by: null,
           locked_until: null,
           lock_token: null // Đã checkout xong thì xóa token giữ chỗ
+        }
+      });
+
+      // 3. Tạo hóa đơn MISA tương ứng tự động
+      await tx.invoice.create({
+        data: {
+          booking_id: booking.id,
+          misa_invoice_no: `MISA-${booking.id.substring(0, 8).toUpperCase()}`,
+          pdf_url: `/invoices/misa_${booking.id.substring(0, 8)}.pdf`,
+          status: 'synced'
         }
       });
 

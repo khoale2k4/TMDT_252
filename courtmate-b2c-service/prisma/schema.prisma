@@ -91,6 +91,7 @@ model Booking {
 
   slots          Slot[]
   review         Review?
+  invoice        Invoice?
 
   @@map("Booking")
 }
@@ -160,4 +161,17 @@ model LobbyMember {
   lobby       Lobby    @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
 
   @@map("lobby_members")
+}
+
+model Invoice {
+  id              String   @id @default(uuid())
+  booking_id      String   @unique
+  misa_invoice_no String?  @db.VarChar(100)
+  pdf_url         String?
+  status          String   @default("issued") @db.VarChar(50)
+  issued_at       DateTime @default(now())
+
+  booking         Booking  @relation(fields: [booking_id], references: [id])
+
+  @@map("invoices")
 }

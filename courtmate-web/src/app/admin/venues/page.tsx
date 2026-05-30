@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Plus, MapPin, Loader, XCircle, CalendarClock, Trash2, Edit2, ChevronDown, ChevronRight, Save, Image as ImageIcon } from 'lucide-react';
 import axiosClient from '@/services/axiosClient';
+import { useLoadScript, GoogleMap, MarkerF } from '@react-google-maps/api';
 import API_ENDPOINTS from '@/services/apiEndpoints';
 import Button from '@/components/Button';
 import { toast } from 'react-toastify';
+
+const mapLibraries: ("places" | "marker")[] = ['places', 'marker'];
 
 export default function AdminVenuesPage() {
   const [venues, setVenues] = useState<any[]>([]);
@@ -26,6 +29,35 @@ export default function AdminVenuesPage() {
   const [editVenueForm, setEditVenueForm] = useState({ name: '', address: '', lat: 10.762622, lng: 106.660172, sport_types_str: '', amenities_str: '', cover_image_url: '' });
   const [courtForm, setCourtForm] = useState({ name: '', sport_type: 'badminton', venueId: '' });
   const [slotData, setSlotData] = useState({ venueId: '', date: new Date().toISOString().split('T')[0], start_hour: 8, end_hour: 22, price: 60000 });
+
+  const { isLoaded: isMapLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    libraries: mapLibraries,
+    version: 'weekly',
+  });
+
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [mapTarget, setMapTarget] = useState<'create' | 'edit'>('create');
+  const [mapInitialCoords, setMapInitialCoords] = useState({ lat: 10.762622, lng: 106.660172 });
+
+  const openMapPicker = (target: 'create' | 'edit') => {
+    setMapTarget(target);
+    if (target === 'create') {
+      setMapInitialCoords({ lat: venueForm.lat || 10.762622, lng: venueForm.lng || 106.660172 });
+    } else {
+      setMapInitialCoords({ lat: editVenueForm.lat || 10.762622, lng: editVenueForm.lng || 106.660172 });
+    }
+    setIsMapModalOpen(true);
+  };
+
+  const handleMapConfirm = (lat: number, lng: number) => {
+    if (mapTarget === 'create') {
+      setVenueForm(prev => ({ ...prev, lat, lng }));
+    } else {
+      setEditVenueForm(prev => ({ ...prev, lat, lng }));
+    }
+    setIsMapModalOpen(false);
+  };
 
   const fetchVenues = async () => {
     try {
@@ -165,7 +197,7 @@ export default function AdminVenuesPage() {
         <h1 className="text-3xl font-bold text-slate-900">Quản lý Hệ thống Sân</h1>
         <Button onClick={() => setIsCreatingVenue(!isCreatingVenue)} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
           {isCreatingVenue ? <XCircle className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-          {isCreatingVenue ? 'Hủy' : 'Tạo Cụm Sân (Venue)'}
+          {isCreatingVenue ? 'Hủy' : 'Tạo Cụm Sân'}
         </Button>
       </div>
 
@@ -176,8 +208,13 @@ export default function AdminVenuesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label className="block text-sm font-medium mb-1">Tên cụm sân</label><input required className="w-full border rounded-lg p-2 outline-none focus:border-blue-500" value={venueForm.name} onChange={e => setVenueForm({...venueForm, name: e.target.value})} /></div>
               <div><label className="block text-sm font-medium mb-1">Địa chỉ</label><input required className="w-full border rounded-lg p-2 outline-none focus:border-blue-500" value={venueForm.address} onChange={e => setVenueForm({...venueForm, address: e.target.value})} /></div>
-              <div><label className="block text-sm font-medium mb-1">Vĩ độ (Latitude)</label><input type="number" step="any" className="w-full border rounded-lg p-2 outline-none focus:border-blue-500" value={venueForm.lat} onChange={e => setVenueForm({...venueForm, lat: Number(e.target.value)})} /></div>
-              <div><label className="block text-sm font-medium mb-1">Kinh độ (Longitude)</label><input type="number" step="any" className="w-full border rounded-lg p-2 outline-none focus:border-blue-500" value={venueForm.lng} onChange={e => setVenueForm({...venueForm, lng: Number(e.target.value)})} /></div>
+              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <div><label className="block text-sm font-medium mb-1">Vĩ độ (Latitude)</label><input type="number" step="any" className="w-full border rounded-lg p-2 outline-none focus:border-blue-500" value={venueForm.lat} onChange={e => setVenueForm({...venueForm, lat: Number(e.target.value)})} /></div>
+                <div><label className="block text-sm font-medium mb-1">Kinh độ (Longitude)</label><input type="number" step="any" className="w-full border rounded-lg p-2 outline-none focus:border-blue-500" value={venueForm.lng} onChange={e => setVenueForm({...venueForm, lng: Number(e.target.value)})} /></div>
+                <Button type="button" onClick={() => openMapPicker('create')} className="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-1.5 h-[42px] w-full">
+                  <MapPin className="w-4 h-4"/> Chọn trên bản đồ
+                </Button>
+              </div>
               <div><label className="block text-sm font-medium mb-1 text-slate-600">Loại thể thao (cách nhau dấu phẩy)</label><input required placeholder="VD: badminton, tennis" className="w-full border rounded-lg p-2 outline-none focus:border-blue-500" value={venueForm.sport_types_str} onChange={e => setVenueForm({...venueForm, sport_types_str: e.target.value})} /></div>
               <div><label className="block text-sm font-medium mb-1 text-slate-600">Tiện ích (cách nhau dấu phẩy)</label><input placeholder="VD: wifi, parking" className="w-full border rounded-lg p-2 outline-none focus:border-blue-500" value={venueForm.amenities_str} onChange={e => setVenueForm({...venueForm, amenities_str: e.target.value})} /></div>
               <div className="md:col-span-2">
@@ -208,8 +245,13 @@ export default function AdminVenuesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div><label className="block text-xs font-medium mb-1">Tên cụm sân</label><input required className="w-full border rounded p-1.5 text-sm outline-none focus:border-blue-500" value={editVenueForm.name} onChange={e => setEditVenueForm({...editVenueForm, name: e.target.value})} /></div>
                       <div><label className="block text-xs font-medium mb-1">Địa chỉ</label><input required className="w-full border rounded p-1.5 text-sm outline-none focus:border-blue-500" value={editVenueForm.address} onChange={e => setEditVenueForm({...editVenueForm, address: e.target.value})} /></div>
-                      <div><label className="block text-xs font-medium mb-1">Vĩ độ</label><input type="number" step="any" className="w-full border rounded p-1.5 text-sm outline-none focus:border-blue-500" value={editVenueForm.lat} onChange={e => setEditVenueForm({...editVenueForm, lat: Number(e.target.value)})} /></div>
-                      <div><label className="block text-xs font-medium mb-1">Kinh độ</label><input type="number" step="any" className="w-full border rounded p-1.5 text-sm outline-none focus:border-blue-500" value={editVenueForm.lng} onChange={e => setEditVenueForm({...editVenueForm, lng: Number(e.target.value)})} /></div>
+                      <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                        <div><label className="block text-xs font-medium mb-1">Vĩ độ</label><input type="number" step="any" className="w-full border rounded p-1.5 text-sm outline-none focus:border-blue-500" value={editVenueForm.lat} onChange={e => setEditVenueForm({...editVenueForm, lat: Number(e.target.value)})} /></div>
+                        <div><label className="block text-xs font-medium mb-1">Kinh độ</label><input type="number" step="any" className="w-full border rounded p-1.5 text-sm outline-none focus:border-blue-500" value={editVenueForm.lng} onChange={e => setEditVenueForm({...editVenueForm, lng: Number(e.target.value)})} /></div>
+                        <Button type="button" onClick={() => openMapPicker('edit')} className="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition py-1.5 px-3 rounded text-xs font-semibold flex items-center justify-center gap-1 h-[34px] w-full">
+                          <MapPin className="w-3.5 h-3.5"/> Bản đồ
+                        </Button>
+                      </div>
                       <div><label className="block text-xs font-medium mb-1">Loại thể thao</label><input required className="w-full border rounded p-1.5 text-sm outline-none focus:border-blue-500" value={editVenueForm.sport_types_str} onChange={e => setEditVenueForm({...editVenueForm, sport_types_str: e.target.value})} /></div>
                       <div><label className="block text-xs font-medium mb-1">Tiện ích</label><input className="w-full border rounded p-1.5 text-sm outline-none focus:border-blue-500" value={editVenueForm.amenities_str} onChange={e => setEditVenueForm({...editVenueForm, amenities_str: e.target.value})} /></div>
                       <div className="md:col-span-2">
@@ -353,6 +395,116 @@ export default function AdminVenuesPage() {
           {venues.length === 0 && <div className="text-center py-16 text-slate-500 border-2 border-dashed border-slate-200 rounded-2xl bg-white shadow-sm">Chưa có dữ liệu sân. Nhấn "Tạo Cụm Sân" để bắt đầu kinh doanh!</div>}
         </div>
       )}
+      <MapPickerModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        initialCoords={mapInitialCoords}
+        onConfirm={handleMapConfirm}
+        isLoaded={isMapLoaded}
+      />
+    </div>
+  );
+}
+interface MapPickerModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  initialCoords: { lat: number; lng: number };
+  onConfirm: (lat: number, lng: number) => void;
+  isLoaded: boolean;
+}
+
+function MapPickerModal({ isOpen, onClose, initialCoords, onConfirm, isLoaded }: MapPickerModalProps) {
+  // 1. Tách biệt state của ghim và tâm bản đồ
+  const [markerPos, setMarkerPos] = useState(initialCoords);
+  const [mapCenter, setMapCenter] = useState(initialCoords);
+
+  useEffect(() => {
+    if (isOpen) {
+      setMarkerPos(initialCoords);
+      setMapCenter(initialCoords); // Chỉ reset tâm khi mở lại modal
+    }
+  }, [isOpen, initialCoords]);
+
+  if (!isOpen) return null;
+
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      setMarkerPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+      // Không cập nhật mapCenter ở đây để tránh giật bản đồ
+    }
+  };
+
+  const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      setMarkerPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col border border-slate-100 max-h-[90vh]">
+        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div>
+            <h3 className="font-bold text-lg text-slate-900">Chọn vị trí trên bản đồ</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Kéo thả ghim hoặc click trực tiếp lên bản đồ để chọn tọa độ chính xác</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-200 rounded-full transition">
+            <XCircle className="w-5 h-5 text-slate-500" />
+          </button>
+        </div>
+        
+        <div className="relative flex-1 min-h-[350px] md:min-h-[450px] bg-slate-100">
+          {isLoaded ? (
+            <GoogleMap
+              mapContainerStyle={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}
+              // 2. Sử dụng mapCenter thay vì markerPos
+              center={mapCenter}
+              zoom={15}
+              onClick={handleMapClick}
+              options={{
+                streetViewControl: false,
+                mapTypeControl: false,
+                fullscreenControl: false,
+                // Tùy chọn: Thêm disableDoubleClickZoom nếu bạn click nhanh hay bị zoom nhầm
+                disableDoubleClickZoom: true, 
+              }}
+            >
+              <MarkerF
+                position={markerPos}
+                draggable={true}
+                onDragEnd={handleMarkerDragEnd}
+              />
+            </GoogleMap>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <Loader className="w-8 h-8 animate-spin text-blue-600" />
+              <span className="text-sm font-medium text-slate-500">Đang tải bản đồ...</span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="flex gap-4 text-xs font-mono text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg w-full sm:w-auto justify-around sm:justify-start">
+            <div>
+              <span className="text-slate-400 font-sans font-medium mr-1">Vĩ độ:</span>
+              <span className="font-semibold text-slate-800">{markerPos.lat.toFixed(6)}</span>
+            </div>
+            <div className="border-l border-slate-200 h-4 self-center hidden sm:block"></div>
+            <div>
+              <span className="text-slate-400 font-sans font-medium mr-1">Kinh độ:</span>
+              <span className="font-semibold text-slate-800">{markerPos.lng.toFixed(6)}</span>
+            </div>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto shrink-0 justify-end">
+            <Button onClick={onClose} className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 text-sm font-semibold rounded-lg w-1/2 sm:w-auto transition-colors">
+              Hủy
+            </Button>
+            <Button onClick={() => onConfirm(markerPos.lat, markerPos.lng)} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-sm font-semibold rounded-lg w-1/2 sm:w-auto transition-colors shadow-sm">
+              Xác nhận
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

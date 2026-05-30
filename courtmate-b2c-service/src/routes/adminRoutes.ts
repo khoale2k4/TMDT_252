@@ -38,4 +38,8 @@ router.get('/pricing-rules/test', adminController.getPricingRules);
 router.post('/pricing-rules/new-rule', adminController.createPricingRule);
 router.put('/pricing-rules/refresh-active-rules', adminController.refreshPricingRules);
 
+// Invoices Proxy
+router.get('/invoices', adminController.getInvoices);
+router.post('/invoices/:id/sync', adminController.syncInvoice);
+
 export default router;

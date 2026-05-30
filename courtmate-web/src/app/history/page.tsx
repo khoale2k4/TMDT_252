@@ -160,17 +160,21 @@ export default function HistoryPage() {
                 <div className="p-4 sm:p-5 flex flex-col md:flex-row gap-6">
                   {/* Slots */}
                   <div className="flex-1 space-y-4">
-                    {booking.slots.map((slot, index) => (
-                      <div key={slot.id} className="flex gap-4 items-start relative">
+                     {booking.slots.map((slot, index) => (
+                      <div key={slot.id} className="flex gap-4 items-center relative">
                         {index !== booking.slots.length - 1 && (
                           <div className="absolute left-6 top-10 bottom-0 w-px bg-slate-200 dark:bg-slate-700 -ml-0.5"></div>
                         )}
-                        <div className="w-12 h-12 shrink-0 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex flex-col items-center justify-center text-blue-600 dark:text-blue-400">
+                        <div className="w-12 h-12 shrink-0 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 text-center">
                           <span className="text-xs font-bold">{slot.date.split('-')[2]}</span>
-                          <span className="text-[10px] uppercase">Tháng {slot.date.split('-')[1]}</span>
+                          <span className="text-[10px] uppercase text-center w-full">Tháng {slot.date.split('-')[1]}</span>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-slate-900 dark:text-white">{slot.court.venue.name} - {slot.court.name}</h4>
+                          <Link href={`/venues/${slot.court.venue.id}`} className="group-hover:text-blue-600 transition-colors">
+                            <h4 className="font-semibold text-slate-900 dark:text-white hover:text-blue-600 hover:underline transition-all">
+                              {slot.court.venue.name} - {slot.court.name}
+                            </h4>
+                          </Link>
                           <div className="mt-1 flex flex-col sm:flex-row gap-1 sm:gap-4 text-sm text-slate-500">
                             <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {slot.court.venue.address}</span>
                             <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {slot.start_time} - {slot.end_time}</span>

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-@Table(name = "users")
+@Table(name = "\"User\"")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -30,7 +30,7 @@ public class Users implements UserDetails {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password", nullable = false)
     private String passwordHash;
 
     @Column(name = "full_name", nullable = false)
@@ -39,9 +39,8 @@ public class Users implements UserDetails {
     @Column(name = "phone", length = 20)
     private String phone;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", columnDefinition = "user_role default 'customer'")
-    private UserRole role = UserRole.customer;
+    @Column(name = "role")
+    private String role = "user";
 
     @Column(name = "avatar_url")
     private String avatarUrl;
@@ -53,9 +52,10 @@ public class Users implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override

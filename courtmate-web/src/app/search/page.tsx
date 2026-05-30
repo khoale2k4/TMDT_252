@@ -23,6 +23,8 @@ function SearchPageContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [mapBounds, setMapBounds] = useState<Bounds | null>(null);
+  const [activeFilters, setActiveFilters] = useState<SearchFilters>({});
+
   const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAP_ID || "DEMO_MAP_ID";
   const { isLoaded: isMapLoaded, loadError: mapLoadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
@@ -91,20 +93,25 @@ function SearchPageContent() {
     }
   }, [searchParams]);
 
+  const handleApplyFilters = useCallback((filters: SearchFilters) => {
+    setActiveFilters(filters);
+    fetchVenues(filters, mapBounds);
+  }, [fetchVenues, mapBounds]);
+
   // Gọi API lần đầu khi vừa vào trang
   useEffect(() => {
     fetchVenues();
   }, [fetchVenues]);
 
-  // Gọi API khi thay đổi Bounds (kéo map)
+  // Gọi API khi thay đổi Bounds (kéo map) và giữ bộ lọc đang áp dụng
   useEffect(() => {
     const handler = setTimeout(() => {
         if (mapBounds) {
-            fetchVenues({}, mapBounds);
+            fetchVenues(activeFilters, mapBounds);
         }
     }, 500);
     return () => clearTimeout(handler);
-  }, [mapBounds, fetchVenues]);
+  }, [mapBounds, activeFilters, fetchVenues]);
 
   const bubbleContent = useMemo(() => {
     if (!selectedVenueId) {
@@ -170,7 +177,7 @@ function SearchPageContent() {
       {isSidebarOpen && (
         <div className="absolute bottom-0 left-0 z-10 h-[85vh] w-full overflow-hidden rounded-t-3xl bg-white shadow-2xl dark:bg-slate-900 md:w-1/3 md:rounded-tr-3xl md:rounded-tl-none lg:w-1/4">
           <SearchSidebar
-            onApplyFilters={fetchVenues}
+            onApplyFilters={handleApplyFilters}
             onVenueSelect={handleVenueSelect}
             defaultLocation={searchParams.get("loc") || ""}
             defaultLatitude={searchParams.get("lat") || "10.7769"}

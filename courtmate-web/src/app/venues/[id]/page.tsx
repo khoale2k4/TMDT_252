@@ -59,6 +59,18 @@ const VenueDetailPage = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchSlotsOnly = async () => {
+    try {
+      const slotsResponse = await axiosClient.get<SlotsResponse>(API_ENDPOINTS.VENUES.SLOT(venueId));
+      const nextCourts = slotsResponse.data.data.courts || [];
+      setCourts(nextCourts);
+      return nextCourts;
+    } catch (err) {
+      console.error('Error polling slots:', err);
+      return [];
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,16 +80,13 @@ const VenueDetailPage = () => {
         const venueResponse = await axiosClient.get(API_ENDPOINTS.VENUES.DETAIL(venueId));
         setVenue(venueResponse.data.venues);
 
-        const slotsResponse = await axiosClient.get<SlotsResponse>(API_ENDPOINTS.VENUES.SLOT(venueId));
-        const nextCourts = slotsResponse.data.data.courts || [];
-        setCourts(nextCourts);
-
+        const nextCourts = await fetchSlotsOnly();
         if (nextCourts.length > 0) {
-          setSelectedCourtId(nextCourts[0].court_id);
+          setSelectedCourtId((current) => current || nextCourts[0].court_id);
         }
       } catch (err) {
         console.error('Error fetching venue data:', err);
-        setError('Khong the tai thong tin san. Vui long thu lai.');
+        setError('Không thể tải thông tin sân. Vui lòng thử lại.');
       } finally {
         setLoading(false);
       }
@@ -86,6 +95,16 @@ const VenueDetailPage = () => {
     if (venueId) {
       fetchData();
     }
+  }, [venueId]);
+
+  useEffect(() => {
+    if (!venueId) return;
+
+    const interval = setInterval(() => {
+      fetchSlotsOnly();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [venueId]);
 
   const selectedCourt = useMemo(
@@ -160,30 +179,55 @@ const VenueDetailPage = () => {
     );
   };
 
-  const handleBookNow = () => {
+  const handleBookNow = async () => {
     if (!venue || !selectedCourt || !selectedDate || selectedSlots.length === 0) {
       return;
     }
 
     setBookingLoading(true);
+    try {
+      const lockPromises = selectedSlots.map(async (slot) => {
+        const response = await axiosClient.post(`/slots/${slot.slot_id}/lock`, {
+          expected_version: slot.version,
+          lock_duration_minutes: 10,
+        });
+        return {
+          slotId: slot.slot_id,
+          lockToken: response.data.data.lock_token,
+        };
+      });
 
-    const draft: BookingDraft = {
-      venueId: venue.venue_id,
-      venueName: venue.name,
-      venueAddress: venue.address,
-      venueImage: venue.cover_image_url || 'https://placehold.co/640x360/e2e8f0/334155?text=CourtMate',
-      sportType: selectedCourt.sport_type || venue.sport_types?.[0] || 'court',
-      courtId: selectedCourt.court_id,
-      courtName: selectedCourt.court_name,
-      bookingDate: selectedDate,
-      slotIds: selectedSlots.map((slot) => slot.slot_id),
-      slotTimes: selectedSlots.map((slot) => slot.start_time),
-      totalPrice,
-      durationHours: selectedSlots.length,
-    };
+      const lockResults = await Promise.all(lockPromises);
+      const lockTokens: Record<string, string> = {};
+      lockResults.forEach((result) => {
+        lockTokens[result.slotId] = result.lockToken;
+      });
 
-    sessionStorage.setItem('courtmate-booking-draft', JSON.stringify(draft));
-    router.push('/checkout');
+      const draft: BookingDraft & { lockTokens?: Record<string, string> } = {
+        venueId: venue.venue_id,
+        venueName: venue.name,
+        venueAddress: venue.address,
+        venueImage: venue.cover_image_url || 'https://placehold.co/640x360/e2e8f0/334155?text=CourtMate',
+        sportType: selectedCourt.sport_type || venue.sport_types?.[0] || 'court',
+        courtId: selectedCourt.court_id,
+        courtName: selectedCourt.court_name,
+        bookingDate: selectedDate,
+        slotIds: selectedSlots.map((slot) => slot.slot_id),
+        slotTimes: selectedSlots.map((slot) => slot.start_time),
+        totalPrice,
+        durationHours: selectedSlots.length,
+        lockTokens,
+      };
+
+      sessionStorage.setItem('courtmate-booking-draft', JSON.stringify(draft));
+      router.push('/checkout');
+    } catch (err: any) {
+      console.error('Error locking slots:', err);
+      const errorMessage = err.response?.data?.error?.message || 'Không thể giữ chỗ sân lúc này. Vui lòng thử lại!';
+      alert(errorMessage);
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading) {
@@ -191,7 +235,7 @@ const VenueDetailPage = () => {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <div className="text-center">
           <Loader className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
-          <p className="text-sm font-medium text-slate-600">Dang tai thong tin san...</p>
+          <p className="text-sm font-medium text-slate-600">Đang tải thông tin sân...</p>
         </div>
       </div>
     );
@@ -202,7 +246,7 @@ const VenueDetailPage = () => {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <div className="rounded-3xl bg-white px-8 py-10 text-center shadow-sm ring-1 ring-slate-200">
           <XCircle className="mx-auto mb-4 h-12 w-12 text-rose-500" />
-          <p className="text-sm font-medium text-slate-700">{error || 'Khong tim thay san.'}</p>
+          <p className="text-sm font-medium text-slate-700">{error || 'Không tìm thấy sân.'}</p>
         </div>
       </div>
     );
@@ -227,7 +271,7 @@ const VenueDetailPage = () => {
               <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-3">
                   <div className="inline-flex rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-600">
-                    {(venue.sport_types?.[0] || 'Sport').toUpperCase()}
+                    {(venue.sport_types?.[0] || 'Thể thao').toUpperCase()}
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
@@ -245,7 +289,7 @@ const VenueDetailPage = () => {
                     <Star className="h-4 w-4 fill-current" />
                     <span>{venue.rating.average ?? 'N/A'}</span>
                     <span className="text-xs font-medium text-amber-600/80">
-                      ({venue.rating.total_reviews ?? 0} reviews)
+                      ({venue.rating.total_reviews ?? 0} đánh giá)
                     </span>
                   </div>
                 )}
@@ -259,7 +303,7 @@ const VenueDetailPage = () => {
                 />
                 <AmenityCard
                   icon={<Car className="h-5 w-5 text-blue-600" />}
-                  label="Parking"
+                  label="Bãi đỗ xe"
                   active={venue.amenities?.includes('parking')}
                 />
                 <AmenityCard
@@ -270,12 +314,62 @@ const VenueDetailPage = () => {
               </div>
 
               <div className="rounded-[28px] bg-slate-50 p-5 ring-1 ring-slate-100">
-                <h2 className="text-lg font-semibold text-slate-900">Thong tin san</h2>
+                <h2 className="text-lg font-semibold text-slate-900">Thông tin sân</h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Khong gian dat san duoc thiet ke de giu flow dat lich that ro rang:
-                  xem thong tin, chon ngay choi, chon khung gio, sau do sang buoc
-                  thanh toan va xac nhan.
+                  {venue.description || "Không gian đặt sân được thiết kế để giữ flow đặt lịch thật rõ ràng: xem thông tin, chọn ngày chơi, chọn khung giờ, sau đó sang bước thanh toán và xác nhận."}
                 </p>
+              </div>
+
+              {/* Đánh giá từ khách hàng */}
+              <div className="rounded-[28px] bg-white border border-slate-100 p-6 md:p-8 space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <h2 className="text-xl font-bold text-slate-900">Đánh giá từ khách hàng</h2>
+                  <div className="flex items-center gap-1.5 text-sm font-semibold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full">
+                    <Star className="h-4 w-4 fill-current text-amber-500" />
+                    <span>{venue.rating?.average || 0} / 5</span>
+                    <span className="text-xs text-amber-600 font-medium">({venue.rating?.total_reviews || 0} đánh giá)</span>
+                  </div>
+                </div>
+
+                <div className="space-y-5 divide-y divide-slate-100">
+                  {venue.reviews && venue.reviews.length > 0 ? (
+                    venue.reviews.map((rev: any) => (
+                      <div key={rev.id} className="pt-5 first:pt-0 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold text-slate-800">{rev.user_name}</div>
+                          <div className="text-xs text-slate-400">
+                            {new Date(rev.created_at).toLocaleDateString('vi-VN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, idx) => (
+                            <Star
+                              key={idx}
+                              className={`h-4 w-4 ${
+                                idx < rev.rating
+                                  ? 'fill-amber-400 text-amber-400'
+                                  : 'text-slate-200'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        {rev.comment && (
+                          <p className="text-sm text-slate-600 leading-relaxed bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
+                            {rev.comment}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-sm text-slate-400 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">
+                      Sân này chưa có nhận xét nào. Hãy trở thành người đầu tiên đánh giá sau khi trải nghiệm nhé!
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </article>
@@ -283,11 +377,11 @@ const VenueDetailPage = () => {
           <aside className="rounded-[32px] bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] ring-1 ring-slate-200 md:p-8 lg:sticky lg:top-28 lg:h-fit">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm text-slate-500">Book Court</p>
-                <h2 className="mt-1 text-2xl font-bold text-slate-900">Chon lich choi</h2>
+                <p className="text-sm text-slate-500">Đặt sân</p>
+                <h2 className="mt-1 text-2xl font-bold text-slate-900">Chọn lịch chơi</h2>
               </div>
               <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Gia tu</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Giá từ</p>
                 <p className="text-2xl font-bold text-blue-600">
                   {formatCurrency(venue.price_range?.min || 0)}
                 </p>
@@ -298,7 +392,7 @@ const VenueDetailPage = () => {
               <section>
                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <CheckCircle2 className="h-4 w-4 text-blue-600" />
-                  Chon san
+                  Chọn sân
                 </div>
                 <div className="grid gap-3">
                   {courts.map((court) => {
@@ -335,7 +429,7 @@ const VenueDetailPage = () => {
               <section>
                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <CalendarDays className="h-4 w-4 text-blue-600" />
-                  Chon ngay
+                  Chọn ngày
                 </div>
                 <input
                   type="date"
@@ -371,12 +465,12 @@ const VenueDetailPage = () => {
               <section>
                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <Clock3 className="h-4 w-4 text-blue-600" />
-                  Chon gio choi
+                  Chọn giờ chơi
                 </div>
 
                 {slotsForSelectedDate.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                    Chua co khung gio trong cho ngay nay.
+                    Chưa có khung giờ trống cho ngày này.
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
@@ -395,24 +489,24 @@ const VenueDetailPage = () => {
 
             <div className="mt-8 rounded-[28px] bg-slate-50 p-5 ring-1 ring-slate-100">
               <div className="flex items-center justify-between text-sm text-slate-500">
-                <span>Ngay choi</span>
+                <span>Ngày chơi</span>
                 <span className="font-medium text-slate-700">
                   {selectedDate ? formatDisplayDate(selectedDate) : '--'}
                 </span>
               </div>
               <div className="mt-3 flex items-center justify-between text-sm text-slate-500">
-                <span>Gio da chon</span>
+                <span>Giờ đã chọn</span>
                 <span className="font-medium text-slate-700">
                   {selectedSlots.length ? selectedSlots.map((slot) => slot.start_time).join(', ') : '--'}
                 </span>
               </div>
               <div className="mt-3 flex items-center justify-between text-sm text-slate-500">
-                <span>Thoi luong</span>
-                <span className="font-medium text-slate-700">{selectedSlots.length} gio</span>
+                <span>Thời lượng</span>
+                <span className="font-medium text-slate-700">{selectedSlots.length} giờ</span>
               </div>
               <div className="mt-4 border-t border-slate-200 pt-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-600">Tong tam tinh</span>
+                  <span className="text-sm font-medium text-slate-600">Tổng tạm tính</span>
                   <span className="text-2xl font-bold text-slate-900">{formatCurrency(totalPrice)}</span>
                 </div>
               </div>
@@ -425,7 +519,7 @@ const VenueDetailPage = () => {
               size="lg"
               className="mt-6 h-14 rounded-2xl text-base font-semibold shadow-lg shadow-blue-200"
             >
-              {bookingLoading ? 'Dang chuyen sang thanh toan...' : 'Book now'}
+              {bookingLoading ? 'Đang chuyển sang thanh toán...' : 'Đặt ngay'}
             </Button>
           </aside>
         </section>
@@ -452,7 +546,7 @@ const AmenityCard = ({
       {icon}
       <div>
         <p className="text-sm font-semibold text-slate-900">{label}</p>
-        <p className="text-xs text-slate-500">{active ? 'Available' : 'Not listed'}</p>
+        <p className="text-xs text-slate-500">{active ? 'Có sẵn' : 'Không hỗ trợ'}</p>
       </div>
     </div>
   </div>
@@ -475,7 +569,7 @@ const SlotButton = ({
       <div className={`${baseStyles} cursor-not-allowed border-slate-200 bg-slate-50 opacity-70`}>
         <XCircle className="mb-2 h-4 w-4 text-slate-400" />
         <p className="text-sm font-semibold text-slate-500">{slot.start_time}</p>
-        <p className="text-xs text-slate-400">Da duoc dat</p>
+        <p className="text-xs text-slate-400">Đã được đặt</p>
       </div>
     );
   }
@@ -485,7 +579,7 @@ const SlotButton = ({
       <div className={`${baseStyles} cursor-wait border-orange-200 bg-orange-50`}>
         <Lock className="mb-2 h-4 w-4 text-orange-500" />
         <p className="text-sm font-semibold text-orange-700">{slot.start_time}</p>
-        <p className="text-xs text-orange-500">Dang giu cho</p>
+        <p className="text-xs text-orange-500">Đang giữ chỗ</p>
       </div>
     );
   }
