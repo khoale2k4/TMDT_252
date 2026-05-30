@@ -277,10 +277,29 @@ export class AdminController {
           court: { venue_id: venueId },
           ...(date ? { date: String(date) } : {})
         },
-        include: { court: true },
+        include: { 
+          court: true,
+          booking: true
+        },
         orderBy: [{ date: 'asc' }, { court_id: 'asc' }, { start_time: 'asc' }]
       });
-      res.status(200).json({ data: slots });
+
+      const userIds = slots.map(s => s.booking?.user_id).filter(Boolean) as string[];
+      const users = await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, full_name: true }
+      });
+      const userMap = new Map(users.map(u => [u.id, u.full_name]));
+
+      const slotsWithUser = slots.map(s => {
+        const userName = s.booking ? userMap.get(s.booking.user_id) : null;
+        return {
+          ...s,
+          booked_by_name: userName
+        };
+      });
+
+      res.status(200).json({ data: slotsWithUser });
     } catch (error) { console.error(error); res.status(500).json({ error: 'Internal server error' }); }
   };
 

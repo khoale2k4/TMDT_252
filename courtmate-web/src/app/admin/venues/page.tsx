@@ -373,11 +373,18 @@ export default function AdminVenuesPage() {
                            {loadingSlots ? <div className="py-4 flex justify-center"><Loader className="w-6 h-6 animate-spin text-blue-400" /></div> : (
                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                                {slots.filter(s => s.court_id === court.id).map(slot => (
-                                 <div key={slot.id} className="border border-slate-200 rounded-lg p-3 flex flex-col items-center justify-center relative group hover:border-blue-400 hover:shadow-sm transition bg-white">
+                                 <div key={slot.id} className="border border-slate-200 rounded-lg p-3 flex flex-col items-center justify-center relative group hover:border-blue-400 hover:shadow-sm transition bg-white min-h-[110px]">
                                    <button onClick={() => handleDeleteSlot(slot.id, venue.id, slotData.date)} className="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition shadow-sm hover:bg-red-200"><XCircle className="w-4 h-4"/></button>
                                    <span className="text-sm font-bold text-slate-800">{slot.start_time.substring(0,5)} - {slot.end_time.substring(0,5)}</span>
                                    <span className="text-xs text-emerald-600 font-bold mt-1">{slot.price.toLocaleString()}đ</span>
-                                   <span className={`text-[10px] uppercase mt-1.5 px-2 py-0.5 rounded-full font-semibold ${slot.status === 'available' ? 'bg-emerald-50 text-emerald-600' : slot.status === 'booked' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>{slot.status}</span>
+                                   
+                                   {slot.status === 'booked' && slot.booked_by_name && (
+                                     <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded mt-1.5 truncate max-w-full text-center" title={slot.booked_by_name}>
+                                       {slot.booked_by_name}
+                                     </span>
+                                   )}
+                                   
+                                   <span className={`text-[10px] uppercase mt-1.5 px-2 py-0.5 rounded-full font-semibold ${slot.status === 'available' ? 'bg-emerald-50 text-emerald-600' : slot.status === 'booked' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'}`}>{slot.status}</span>
                                  </div>
                                ))}
                                {slots.filter(s => s.court_id === court.id).length === 0 && <div className="col-span-full text-center text-sm text-slate-400 py-6 border-2 border-dashed border-slate-100 rounded-xl bg-slate-50">Sân này chưa có khung giờ nào trong ngày {slotData.date}.</div>}
