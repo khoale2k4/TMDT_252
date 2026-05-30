@@ -7,12 +7,14 @@ import Button from '@/components/Button';
 import { Search, FileText, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 
 type Invoice = {
-  id: string;
-  invoice_no: string | null;
+  invoice_id: string;
+  misa_invoice_no: string | null;
   status: 'pending' | 'synced' | 'failed';
-  amount: number;
-  created_at: string;
+  total: number;
+  issued_at: string;
   booking_id: string;
+  buyer_name: string;
+  pdf_url: string | null;
 };
 
 export default function InvoicesPage() {
@@ -30,8 +32,7 @@ export default function InvoicesPage() {
           setInvoices(invoiceData);
       } else {
           // Fallback to mock data if backend doesn't return anything useful yet
-          setInvoices([
-          ]);
+          setInvoices([]);
       }
       setIsLoading(false);
     } catch (error) {
@@ -57,8 +58,8 @@ export default function InvoicesPage() {
       }
       
       setInvoices(prev => prev.map(inv => {
-        if (inv.id === id || inv.booking_id === id) {
-          return { ...inv, status: 'synced', invoice_no: `HD${Math.floor(Math.random() * 9000) + 1000}` };
+        if (inv.invoice_id === id || inv.booking_id === id) {
+          return { ...inv, status: 'synced', misa_invoice_no: `HD${Math.floor(Math.random() * 9000) + 1000}` };
         }
         return inv;
       }));
@@ -118,9 +119,9 @@ export default function InvoicesPage() {
                 </tr>
               ) : (
                 invoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={inv.invoice_id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-slate-900">
-                      {inv.invoice_no || <span className="text-slate-400 italic">Chưa cấp</span>}
+                      {inv.misa_invoice_no || <span className="text-slate-400 italic">Chưa cấp</span>}
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-mono">
@@ -128,9 +129,9 @@ export default function InvoicesPage() {
                         {inv.booking_id}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-medium">{formatCurrency(inv.amount)}</td>
+                    <td className="px-6 py-4 font-medium">{formatCurrency(inv.total)}</td>
                     <td className="px-6 py-4">
-                      {new Date(inv.created_at).toLocaleDateString('vi-VN')}
+                      {new Date(inv.issued_at).toLocaleDateString('vi-VN')}
                     </td>
                     <td className="px-6 py-4">
                       {inv.status === 'synced' && (
@@ -153,11 +154,11 @@ export default function InvoicesPage() {
                       {inv.status !== 'synced' ? (
                         <Button 
                           size="sm" 
-                          onClick={() => handleManualSync(inv.id)}
-                          disabled={syncingId === inv.id}
+                          onClick={() => handleManualSync(inv.invoice_id)}
+                          disabled={syncingId === inv.invoice_id}
                           className="shadow-sm"
                         >
-                          {syncingId === inv.id ? 'Đang đồng bộ...' : 'Manual Sync'}
+                          {syncingId === inv.invoice_id ? 'Đang đồng bộ...' : 'Manual Sync'}
                         </Button>
                       ) : (
                         <Button size="sm" variant="secondary">Tải PDF</Button>

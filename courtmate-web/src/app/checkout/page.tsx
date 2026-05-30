@@ -83,7 +83,7 @@ export default function CheckoutPage() {
   const [draft, setDraft] = useState<BookingDraft | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState<CheckoutStep>(1);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit-card');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('qr');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [userId, setUserId] = useState<string>('');
@@ -510,7 +510,7 @@ function ConfirmStep({
   const memo = `CM${draft.venueId?.slice(0, 6)}${userId ? `-${userId.slice(0, 4)}` : ''}`.toUpperCase();
 
   useEffect(() => {
-    if (paymentLabel !== 'QR') return;
+    if (paymentLabel !== 'QR Code') return;
     if (hasTriggered.current) return;
 
     const timer = setInterval(() => {
@@ -548,11 +548,11 @@ function ConfirmStep({
           <SummaryRow label="Khung giờ" value={draft.slotTimes.join(', ')} />
           <SummaryRow label="Thời lượng" value={`${draft.durationHours} giờ`} />
           <SummaryRow label="Cụm sân" value={draft.venueName} />
-          <SummaryRow label="Phương thức" value={paymentLabel === 'QR' ? 'Chuyển khoản QR' : paymentLabel} />
+          <SummaryRow label="Phương thức" value={paymentLabel === 'QR Code' ? 'Chuyển khoản QR' : paymentLabel} />
         </div>
       </div>
 
-      {paymentLabel === 'QR' ? (
+      {paymentLabel === 'QR Code' ? (
         <div className="mt-8 flex w-full max-w-xl flex-col items-center justify-center rounded-[28px] bg-white p-8 text-center shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
           <h2 className="text-xl font-bold text-slate-900">Quét mã VietQR để thanh toán</h2>
           <p className="mt-2 text-sm text-slate-500">Mở ứng dụng ngân hàng và quét mã bên dưới</p>
@@ -588,9 +588,9 @@ function ConfirmStep({
         size="lg"
         className="mt-8 min-w-48 rounded-2xl px-8 text-base font-semibold shadow-lg shadow-blue-200"
         onClick={onConfirm}
-        disabled={paymentLabel === 'QR' && isPaid}
+        disabled={paymentLabel === 'QR Code' && isPaid}
       >
-        {paymentLabel === 'QR' && isPaid ? 'Đang xử lý...' : 'Xác nhận'}
+        {paymentLabel === 'QR Code' && isPaid ? 'Đang xử lý...' : 'Xác nhận'}
       </Button>
     </div>
   );
