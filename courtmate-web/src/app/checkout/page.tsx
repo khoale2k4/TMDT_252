@@ -429,6 +429,27 @@ function ConfirmStep({
   paymentLabel: string;
   onConfirm: () => void;
 }) {
+  const [countdown, setCountdown] = useState(10);
+  const [isPaid, setIsPaid] = useState(false);
+
+  useEffect(() => {
+    if (paymentLabel !== 'QR') return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsPaid(true);
+          onConfirm();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [paymentLabel, onConfirm]);
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col items-center text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-emerald-500 shadow-[0_12px_30px_rgba(15,23,42,0.18)] ring-1 ring-slate-200">
@@ -454,23 +475,30 @@ function ConfirmStep({
         <div className="mt-8 flex w-full max-w-xl flex-col items-center justify-center rounded-[28px] bg-white p-8 text-center shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
           <h2 className="text-xl font-bold text-slate-900">Quét mã VietQR để thanh toán</h2>
           <p className="mt-2 text-sm text-slate-500">Mở ứng dụng ngân hàng và quét mã bên dưới</p>
-          <div className="mt-6 overflow-hidden rounded-2xl border-2 border-slate-100 p-6 flex justify-center items-center">
-            <QRCodeSVG
-              value={`vietqr://970436/0987654321?amount=${draft.totalPrice}&addInfo=CM${draft.venueId?.slice(0,6)}`}
-              size={200}
-              level="H"
-              includeMargin={false}
-              imageSettings={{
-                src: "https://vietqr.net/portal/v2/img/vietqr-logo.svg",
-                height: 40,
-                width: 40,
-                excavate: true,
-              }}
+          <div className="mt-6 overflow-hidden rounded-2xl border-2 border-slate-100 p-4 flex justify-center items-center bg-white max-w-[340px]">
+            <img
+              src={`https://img.vietqr.io/image/MB-0987654321-compact.png?amount=${draft.totalPrice}&addInfo=CM${draft.venueId?.slice(0, 6)}&accountName=COURTMATE`}
+              alt="Mã VietQR Thanh Toán"
+              className="w-full h-auto max-h-[320px] object-contain rounded-xl"
             />
           </div>
-          <div className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+          <div className="mt-6 w-full rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
             <p>Nội dung chuyển khoản:</p>
-            <p className="mt-1 text-lg font-bold text-slate-900 tracking-wider">CM{draft.venueId?.slice(0,6)}</p>
+            <p className="mt-1 text-lg font-bold text-slate-900 tracking-wider">CM{draft.venueId?.slice(0, 6)}</p>
+          </div>
+          
+          <div className="mt-6 flex flex-col items-center gap-2">
+            {isPaid ? (
+              <div className="flex items-center gap-2 text-emerald-600 font-semibold">
+                <Check className="h-5 w-5 animate-bounce" />
+                <span>Thanh toán thành công! Đang chuyển hướng...</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-amber-600 font-semibold animate-pulse">
+                <Loader className="h-5 w-5 animate-spin" />
+                <span>Đang chờ thanh toán (giả lập thành công sau {countdown}s)...</span>
+              </div>
+            )}
           </div>
         </div>
       ) : null}
@@ -479,8 +507,9 @@ function ConfirmStep({
         size="lg"
         className="mt-8 min-w-48 rounded-2xl px-8 text-base font-semibold shadow-lg shadow-blue-200"
         onClick={onConfirm}
+        disabled={paymentLabel === 'QR' && isPaid}
       >
-        Confirm
+        {paymentLabel === 'QR' && isPaid ? 'Đang xử lý...' : 'Confirm'}
       </Button>
     </div>
   );
