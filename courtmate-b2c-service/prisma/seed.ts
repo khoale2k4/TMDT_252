@@ -148,13 +148,16 @@ async function main() {
       bookingDate.setDate(today.getDate() - randomDaysAgo);
       bookingDate.setHours(8 + Math.floor(Math.random() * 12), Math.floor(Math.random() * 60), 0, 0);
 
+      const amount = venue.min_price * 1 + Math.floor(Math.random() * 2) * (venue.max_price - venue.min_price);
       const booking = await prisma.booking.create({
         data: {
           id: `d0000000-0000-0000-0000-${String(bookingCount).padStart(12, '0')}`,
           user_id: randomUser.id,
-          status: 'paid',
+          venue_id: venue.id,
+          status: 'completed',
           payment_method: randomPayment,
-          total_amount: venue.min_price * 1 + Math.floor(Math.random() * 2) * (venue.max_price - venue.min_price),
+          total_amount: amount,
+          final_amount: amount,
           created_at: bookingDate
         }
       });

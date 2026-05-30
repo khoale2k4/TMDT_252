@@ -18,7 +18,7 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
   const { lat, lng, radiusKm, minLat, maxLat, minLng, maxLng, sportTypes, sortBy, limit, offset } = params;
 
   let distanceCalc = '0';
-  let whereClause = 'WHERE EXISTS (SELECT 1 FROM "Court" WHERE "Court".venue_id = "Venue".id)';
+  let whereClause = 'WHERE EXISTS (SELECT 1 FROM courts WHERE courts.venue_id = venues.id)';
 
   if (minLat !== undefined && maxLat !== undefined && minLng !== undefined && maxLng !== undefined) {
     // Bounding Box Query
@@ -49,7 +49,7 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
       sport_types, amenities, cover_image_url,
       min_price, max_price, rating_avg, total_reviews,
       ${distanceCalc} AS distance_km
-    FROM "Venue"
+    FROM venues
     ${whereClause}
     ${orderByClause}
     LIMIT ${limit} OFFSET ${offset}
@@ -58,7 +58,7 @@ export const findNearbyVenues = async (params: NearbyVenueParams) => {
   // Query Count để làm phân trang
   const countQuery = `
     SELECT COUNT(*)::int as total
-    FROM "Venue"
+    FROM venues
     ${whereClause}
   `;
 

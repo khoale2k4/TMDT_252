@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-@Table(name = "\"User\"")
+@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

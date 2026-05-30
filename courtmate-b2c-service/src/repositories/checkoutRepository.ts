@@ -10,13 +10,22 @@ export class CheckoutRepository {
 
   public async createBookingTransaction(userId: string, slotIds: string[], paymentMethod: string, totalAmount: number) {
     return prisma.$transaction(async (tx) => {
-      // 1. Tạo Booking mới
+      // Find venue_id from the first slot
+      const firstSlot = await tx.slot.findUnique({
+        where: { id: slotIds[0] },
+        include: { court: true }
+      });
+      const venueId = firstSlot?.court?.venue_id || null;
+
+      // 1. Tạo Booking mới với status 'completed' (để khớp enum B2B và hiển thị doanh thu)
       const booking = await tx.booking.create({
         data: {
           user_id: userId,
-          status: 'paid',
+          venue_id: venueId,
+          status: 'completed',
           payment_method: paymentMethod,
-          total_amount: totalAmount
+          total_amount: totalAmount,
+          final_amount: totalAmount
         }
       });
 

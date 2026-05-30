@@ -7,20 +7,24 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
+  id         String    @id @default(uuid()) @db.Uuid
+  email      String    @unique
   password   String
   full_name  String
   phone      String?
-  role       String   @default("user") // "user", "owner", "admin"
-  created_at DateTime @default(now())
+  role       String    @default("user") // "user", "owner", "admin"
+  avatar_url String?
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
 
   // Relations
-  venues     Venue[]  @relation("OwnerVenues")
+  venues     Venue[]   @relation("OwnerVenues")
+
+  @@map("users")
 }
 
 model Venue {
-  id              String   @id @default(uuid())
+  id              String   @id @default(uuid()) @db.Uuid
   name            String
   address         String
   lat             Float
@@ -32,7 +36,7 @@ model Venue {
   rating_avg      Float    @default(0)
   total_reviews   Int      @default(0)
   cover_image_url String?
-  owner_id        String?  // Nullable cho những venue cũ
+  owner_id        String?  @db.Uuid // Nullable cho những venue cũ
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
@@ -40,13 +44,13 @@ model Venue {
   courts          Court[] 
   owner           User?    @relation("OwnerVenues", fields: [owner_id], references: [id], onDelete: SetNull) 
 
-  @@map("Venue")
+  @@map("venues")
 }
 
 // THÊM BẢNG COURT
 model Court {
-  id         String   @id @default(uuid())
-  venue_id   String
+  id         String   @id @default(uuid()) @db.Uuid
+  venue_id   String   @db.Uuid
   name       String
   sport_type String
   image_url  String?
@@ -54,13 +58,13 @@ model Court {
 
   venue      Venue    @relation(fields: [venue_id], references: [id], onDelete: Cascade)
 
-  @@map("Court")
+  @@map("courts")
 }
 
 // THÊM BẢNG SLOT
 model Slot {
-  id         String   @id @default(uuid())
-  court_id   String
+  id         String   @id @default(uuid()) @db.Uuid
+  court_id   String   @db.Uuid
   date       String   // Lưu kiểu "YYYY-MM-DD" cho dễ query
   start_time String   // VD: "08:00"
   end_time   String   // VD: "09:00"
@@ -68,46 +72,54 @@ model Slot {
   price      Int
   version    Int      @default(1)
 
-  locked_by    String?   // ID của user đang giữ slot
+  locked_by    String?   @db.Uuid // ID của user đang giữ slot
   locked_until DateTime? // Thời gian hết hạn khóa
 
   lock_token   String?   // Dùng để đối chiếu lúc checkout
-  booking_id   String?
+  booking_id   String?   @db.Uuid
 
   court      Court    @relation(fields: [court_id], references: [id], onDelete: Cascade)
   booking      Booking?  @relation(fields: [booking_id], references: [id])
 
-  @@map("Slot")
+  @@map("slots")
 }
 
 
 model Booking {
-  id             String   @id @default(uuid())
-  user_id        String
-  status         String   // "pending_payment", "paid", "cancelled"
-  payment_method String
-  total_amount   Int
-  created_at     DateTime @default(now())
+  id                  String    @id @default(uuid()) @db.Uuid
+  user_id             String    @db.Uuid
+  venue_id            String?   @db.Uuid
+  status              String    // "pending_payment", "paid", "cancelled"
+  payment_method      String
+  total_amount        Int
+  final_amount        Int?
+  discount_amount     Int?      @default(0)
+  tax_amount          Int?      @default(0)
+  notes               String?
+  recurring_frequency String?
+  recurring_group_id  String?   @db.Uuid
+  created_at          DateTime  @default(now())
+  updated_at          DateTime? @updatedAt
 
   slots          Slot[]
   review         Review?
   invoice        Invoice?
 
-  @@map("Booking")
+  @@map("bookings")
 }
 
 model Review {
-  id          String   @id @default(uuid())
-  booking_id  String   @unique
-  user_id     String
-  venue_id    String
+  id          String   @id @default(uuid()) @db.Uuid
+  booking_id  String   @unique @db.Uuid
+  user_id     String   @db.Uuid
+  venue_id    String   @db.Uuid
   rating      Int
   comment     String?
   created_at  DateTime @default(now())
 
   booking     Booking  @relation(fields: [booking_id], references: [id], onDelete: Cascade)
 
-  @@map("Review")
+  @@map("reviews")
 }
 
 model UserActivity {
@@ -164,8 +176,8 @@ model LobbyMember {
 }
 
 model Invoice {
-  id              String   @id @default(uuid())
-  booking_id      String   @unique
+  id              String   @id @default(uuid()) @db.Uuid
+  booking_id      String   @unique @db.Uuid
   misa_invoice_no String?  @db.VarChar(100)
   pdf_url         String?
   status          String   @default("issued") @db.VarChar(50)

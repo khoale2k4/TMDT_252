@@ -2,45 +2,60 @@ import prisma from './config/prisma';
 
 async function main() {
   try {
-    console.log("Starting to fix invoices foreign key constraint...");
+    console.log("Starting to fix invoices foreign key constraint and type mismatch operators...");
     
-    // 1. Dynamically find and drop ALL foreign key constraints on the invoices table
+    // 1. Drop existing operators if any
     await prisma.$executeRawUnsafe(`
-      DO $$
-      DECLARE
-          r RECORD;
-      BEGIN
-          FOR r IN (
-              SELECT constraint_name 
-              FROM information_schema.table_constraints 
-              WHERE table_name = 'invoices' AND constraint_type = 'FOREIGN KEY'
-          ) LOOP
-              EXECUTE 'ALTER TABLE invoices DROP CONSTRAINT ' || quote_ident(r.constraint_name);
-          END LOOP;
-      END $$;
+      DROP OPERATOR IF EXISTS = (uuid, varchar) CASCADE;
     `);
-    console.log("Successfully dropped all existing foreign key constraints on the invoices table.");
+    await prisma.$executeRawUnsafe(`
+      DROP OPERATOR IF EXISTS = (varchar, uuid) CASCADE;
+    `);
 
-    // 2. Alter column booking_id type in invoices to VARCHAR(255) to match Booking.id (which is a string/text type in Prisma)
+    // 2. Create the comparison functions
     await prisma.$executeRawUnsafe(`
-      ALTER TABLE invoices 
-      ALTER COLUMN booking_id TYPE VARCHAR(255);
+      CREATE OR REPLACE FUNCTION uuid_eq_varchar(uuid, varchar) RETURNS boolean AS $$
+        BEGIN
+          RETURN $1 = CAST($2 AS uuid);
+        EXCEPTION WHEN others THEN
+          RETURN FALSE;
+        END;
+      $$ LANGUAGE plpgsql IMMUTABLE STRICT;
     `);
-    console.log("Successfully altered invoices.booking_id type to VARCHAR(255).");
 
-    // 3. Add the correct foreign key constraint pointing to the Booking table (mapped from model Booking)
     await prisma.$executeRawUnsafe(`
-      ALTER TABLE invoices 
-      ADD CONSTRAINT invoices_booking_id_fkey 
-      FOREIGN KEY (booking_id) 
-      REFERENCES "Booking" (id) 
-      ON DELETE CASCADE;
+      CREATE OR REPLACE FUNCTION varchar_eq_uuid(varchar, uuid) RETURNS boolean AS $$
+        BEGIN
+          RETURN CAST($1 AS uuid) = $2;
+        EXCEPTION WHEN others THEN
+          RETURN FALSE;
+        END;
+      $$ LANGUAGE plpgsql IMMUTABLE STRICT;
     `);
-    console.log("Successfully added correct foreign key constraint pointing to Booking(id).");
-    
-    console.log("Constraint fix completed successfully!");
+
+    // 3. Create the custom operators
+    await prisma.$executeRawUnsafe(`
+      CREATE OPERATOR = (
+        LEFTARG = uuid,
+        RIGHTARG = varchar,
+        PROCEDURE = uuid_eq_varchar,
+        COMMUTATOR = =
+      );
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE OPERATOR = (
+        LEFTARG = varchar,
+        RIGHTARG = uuid,
+        PROCEDURE = varchar_eq_uuid,
+        COMMUTATOR = =
+      );
+    `);
+
+    console.log("Successfully created implicit custom comparison operators for uuid = varchar.");
+    console.log("Constraint and operator fix completed successfully!");
   } catch (error) {
-    console.error("Error fixing foreign key constraint:", error);
+    console.error("Error fixing foreign key constraint or operators:", error);
   } finally {
     await prisma.$disconnect();
   }
